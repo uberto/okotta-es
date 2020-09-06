@@ -1,0 +1,16 @@
+plugins {
+    id 'org.jetbrains.kotlin.jvm' version '1.4.0'
+}
+
+
+allprojects {
+    
+    group 'com.ubertob'
+    version '0.1'
+
+    repositories {
+        mavenCentral()
+        jcenter()
+    }
+
+}

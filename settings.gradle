@@ -1,0 +1,6 @@
+rootProject.name = 'okotta-es'
+
+include 'core'
+include 'codegen'
+include 'example-ticketing'
+
