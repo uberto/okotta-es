@@ -55,7 +55,7 @@ fun main(){
             .build())
         .build()
 
-    file.writeTo(File("examples/door.kt"))
+    file.writeTo(File("generated/door.kt"))
 
 }
 
