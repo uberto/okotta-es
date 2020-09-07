@@ -1,0 +1,14 @@
+digraph pizza
+{
+    start -> preparing [label="start"]
+    preparing-> preparing [label="add topping"]
+    preparing -> ordering  [label="add address"]
+    ordering -> packaging  [label="bake"]
+    packaging -> delivering  [label="deliver"]
+    delivering -> done  [label="accept"]
+
+    preparing -> cancelled[label="cancel"]
+    ordering -> cancelled[label="cancel"]
+    packaging -> cancelled[label="cancel"]
+    delivering -> cancelled[label="cancel"]
+}
