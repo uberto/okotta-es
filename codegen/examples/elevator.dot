@@ -1,0 +1,13 @@
+digraph elevator
+{
+    idle -> goingUp [label="went up"]
+    goingUp -> idle [label="halted"]
+    goingUp -> goingUp  [label="went up"]
+    goingUp -> atTop  [label="top reached"]
+    idle -> goingDown [label="went down"]
+    goingDown -> idle  [label="halted"]
+    goingDown -> goingDown  [label="went down"]
+    goingDown -> atBottom  [label="bottom reached"]
+    atTop  -> goingDown [label="went down"]
+    atBottom  -> goingUp  [label="went up"]
+}
