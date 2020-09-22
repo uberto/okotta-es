@@ -2,53 +2,41 @@ package com.ubertob.okotta.core
 
 import java.util.concurrent.atomic.AtomicReference
 
-interface ToDoListRetriever : EntityRetriever<ToDoListState, ToDoListEvent> {
+interface SafeRetriever : EntityRetriever<SafeState, SafeEvent> {
 
-    fun retrieveByName(user: User, listName: ListName): ToDoListState?
-
-    override fun retrieveById(id: ToDoListId): ToDoListState?
+    override fun retrieveById(id: SafeId): SafeState?
 
 }
 
 
-class ToDoListEventStore(private val eventStreamer: ToDoListEventStreamer) : ToDoListRetriever,
-    EventPersister<ToDoListEvent> {
+class SafeEventStore(private val eventStreamer: SafeEventStreamer) : SafeRetriever,
+    EventPersister<SafeEvent> {
 
-    override fun retrieveById(id: ToDoListId): ToDoListState? =
+    override fun retrieveById(id: SafeId): SafeState? =
         eventStreamer(id)
             ?.fold()
 
-    
-    override fun retrieveByName(user: User, listName: ListName): ToDoListState? =
-        eventStreamer.retrieveIdFromName(user, listName)
-            ?.let(::retrieveById)
 
-    override fun invoke(events: Iterable<ToDoListEvent>) {
+    override fun invoke(events: Iterable<SafeEvent>) {
         eventStreamer.store(events)
     }
 
 }
 
 
-interface ToDoListEventStreamer : EventStreamer<ToDoListEvent> {
-    fun retrieveIdFromName(user: User, listName: ListName): ToDoListId?
-    fun store(newEvents: Iterable<ToDoListEvent>)
+interface SafeEventStreamer : EventStreamer<SafeEvent> {
+     fun store(newEvents: Iterable<SafeEvent>)
 }
 
-class ToDoListEventStreamerInMemory : ToDoListEventStreamer {
+class SafeEventStreamerInMemory : SafeEventStreamer {
 
-    val events = AtomicReference<List<ToDoListEvent>>(listOf())
+    val events = AtomicReference<List<SafeEvent>>(listOf())
 
-    override fun retrieveIdFromName(user: User, listName: ListName): ToDoListId? =
-        events.get()
-            .firstOrNull { it == ListCreated(it.id, user, listName) }
-            ?.id
-
-    override fun store(newEvents: Iterable<ToDoListEvent>) {
+    override fun store(newEvents: Iterable<SafeEvent>) {
         events.updateAndGet { it + newEvents }
     }
 
-    override fun invoke(id: ToDoListId): Iterable<ToDoListEvent> =
+    override fun invoke(id: SafeId): Iterable<SafeEvent> =
         events.get()
             .filter { it.id == id }
 
