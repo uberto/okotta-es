@@ -14,14 +14,13 @@ fun Iterable<SafeEvent>.fold(): SafeState =
 
 sealed class SafeState : EntityState<SafeEvent> {
     abstract override fun combine(event: SafeEvent): SafeState
-
 }
 
 object InitialState : SafeState() {
     override fun combine(event: SafeEvent): SafeState =
             when (event) {
                 is Opened -> Open(event.id)
-                else -> this //ignore other events
+                else -> InvalidState(event.id,this, event)
             }
 
 }
@@ -32,8 +31,7 @@ data class Open internal constructor(
     override fun combine(event: SafeEvent): SafeState =
             when (event) {
                 is Closed -> AlarmInactive(id)
-                else -> this //ignore other events
-
+                else -> InvalidState(id,this, event)
             }
 }
 
@@ -44,7 +42,7 @@ data class AlarmInactive internal constructor(
             when (event) {
                 is Opened -> Open(id)
                 is Locked -> AlarmActive(id, event.code)
-                else -> this //ignore other events
+                else -> InvalidState(id,this, event)
             }
 
 }
@@ -56,6 +54,10 @@ data class AlarmActive internal constructor(
     override fun combine(event: SafeEvent): SafeState =
             when (event) {
                 is Unlocked -> AlarmInactive(id)
-                else -> this //ignore other events
+                else -> InvalidState(id,this, event)
             }
+}
+
+data class InvalidState(val id: SafeId, val prevState: SafeState, val event: SafeEvent): SafeState() {
+    override fun combine(event: SafeEvent): SafeState = this //ignore other events
 }
