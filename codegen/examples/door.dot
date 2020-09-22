@@ -1,7 +1,0 @@
-digraph door
-{
-    open -> closed [label="close"]
-    closed -> open [label="open"]
-    closed -> locked  [label="lock"]
-    locked -> closed  [label="unlock"]
-}

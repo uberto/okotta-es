@@ -1,6 +1,6 @@
 digraph elevator
 {
-    init -> idleAtBottom [label="start"]
+    init -> idleAtBottom [label="start" constraint=false  ]
     idle -> goingUp [label="went up" comment="destination:Int,peopleIn:Int"]
     goingUp -> idle [label="halted" comment="peopleOut:Int"]
     goingUp -> goingUp  [label="went up"]
@@ -9,6 +9,6 @@ digraph elevator
     goingDown -> idle  [label="halted" comment="peopleOut:Int"  ]
     goingDown -> goingDown  [label="went down"]
     goingDown -> idleAtBottom  [label="bottom reached" comment="peopleOut:Int"]
-    idleAtTop  -> goingDown [label="went down" comment="destination:Int,peopleIn:Int"]
+    idleAtTop  -> goingDown [label="went down"  comment="destination:Int,peopleIn:Int"]
     idleAtBottom  -> goingUp  [label="went up" comment="destination:Int,peopleIn:Int"]
 }

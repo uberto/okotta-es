@@ -1,0 +1,7 @@
+digraph safe
+{
+    open -> alarmInactive [label="closed"]
+    alarmInactive -> open [label="opened"]
+    alarmInactive -> alarmActive  [label="locked"]
+    alarmActive -> alarmInactive  [label="unlocked"]
+}
