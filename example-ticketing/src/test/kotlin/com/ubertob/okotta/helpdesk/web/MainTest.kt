@@ -10,7 +10,6 @@ import org.http4k.core.Request
 import org.http4k.core.Status
 import org.http4k.server.Jetty
 import org.http4k.server.asServer
-import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo

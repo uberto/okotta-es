@@ -22,9 +22,15 @@ fun emitKotlinCode(graph: Graph): FileSpec {
     graph.nodes.values.forEach { node ->
         file.addType(
             TypeSpec.classBuilder(node.id.toClassName())
+                .primaryConstructor(
+                    FunSpec.constructorBuilder()
+                        .addParameter("id", String::class)
+                        .build())
                 .addModifiers(KModifier.DATA)
-                .addProperty("id", String::class)
-                .addSuperinterface(stateBase)
+                .addProperty(PropertySpec.builder("id", String::class)
+                    .initializer("id")
+                    .build())
+                .superclass(stateBase)
                 .build()
         ).build()
     }
@@ -42,9 +48,14 @@ fun emitKotlinCode(graph: Graph): FileSpec {
         val name = edge.getAttribute("label").toString()
         file.addType(
             TypeSpec.classBuilder(name.toClassName())
+                .primaryConstructor(
+                    FunSpec.constructorBuilder()
+                    .addParameter("id", String::class).build())
+                .addProperty(PropertySpec.builder("id", String::class)
+                    .initializer("id")
+                    .build())
                 .addModifiers(KModifier.DATA)
-                .addProperty("id", String::class)
-                .addSuperinterface(baseEvent)
+                .superclass(baseEvent)
                 .build()
         )
             .build()

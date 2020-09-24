@@ -1,0 +1,9 @@
+digraph helpdesk {
+Start -> InBacklog[label="Created"]; 
+InBacklog -> InProgress[label="Started"]; 
+InProgress -> InProgress[label="Assigned"]; 
+InProgress -> InProgress[label="Updated"]; 
+InProgress -> OnHold[label="Blocked"]; 
+InBacklog -> OnHold[label="Blocked"];
+InProgress -> Done[label="Completed"]; 
+}

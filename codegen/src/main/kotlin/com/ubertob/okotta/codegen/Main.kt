@@ -7,7 +7,7 @@ import java.io.File
 
 fun main(){
 
-    val g = parseDotFile("examples/pizza.dot")
+    val g = parseDotFile("/home/ubertobarbini/svi/kotlin/okotta-es/codegen/examples/helpdesk.dot")
 
     val f = emitKotlinCode(g)
 
