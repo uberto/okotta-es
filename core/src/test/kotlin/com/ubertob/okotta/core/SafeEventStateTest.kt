@@ -13,8 +13,6 @@ class SafeEventStateTest {
         val events = listOf(
                 Opened(safe),
                 Closed(safe),
-                Opened(safe),
-                Closed(safe),
                 Locked(safe, "abc")
                 )
 

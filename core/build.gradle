@@ -8,7 +8,6 @@ dependencies {
     testRuntime "org.junit.jupiter:junit-jupiter-engine:${junitVersion}"
     testRuntime "org.junit.platform:junit-platform-launcher:${junitLauncherVersion}"
 
-    testImplementation "com.ubertob.pesticide:pesticide-core:${pesticideVersion}"
     testImplementation "io.strikt:strikt-core:${striktVersion}"
 
 }
