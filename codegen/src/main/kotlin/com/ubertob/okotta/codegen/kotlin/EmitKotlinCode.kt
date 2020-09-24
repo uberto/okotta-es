@@ -19,21 +19,27 @@ fun emitKotlinCode(graph: Graph): FileSpec {
     val stateBase = ClassName(packageName, stateBaseName)
 
 
-    graph.nodes.values.forEach { node ->
-        file.addType(
-            TypeSpec.classBuilder(node.id.toClassName())
-                .primaryConstructor(
-                    FunSpec.constructorBuilder()
-                        .addParameter("id", String::class)
-                        .build())
-                .addModifiers(KModifier.DATA)
-                .addProperty(PropertySpec.builder("id", String::class)
-                    .initializer("id")
-                    .build())
-                .superclass(stateBase)
-                .build()
-        ).build()
-    }
+    graph.nodes.values
+        .map { it.id }
+        .toSet()
+        .forEach { nodeId ->
+            file.addType(
+                TypeSpec.classBuilder(nodeId.toClassName())
+                    .primaryConstructor(
+                        FunSpec.constructorBuilder()
+                            .addParameter("id", String::class)
+                            .build()
+                    )
+                    .addModifiers(KModifier.DATA)
+                    .addProperty(
+                        PropertySpec.builder("id", String::class)
+                            .initializer("id")
+                            .build()
+                    )
+                    .superclass(stateBase)
+                    .build()
+            ).build()
+        }
 
     val baseEventName = "${baseName}Event"
     file.addType(
@@ -44,26 +50,33 @@ fun emitKotlinCode(graph: Graph): FileSpec {
 
     val baseEvent = ClassName(packageName, baseEventName)
 
-    graph.edges.values.forEach { edge ->
-        val name = edge.getAttribute("label").toString()
-        file.addType(
-            TypeSpec.classBuilder(name.toClassName())
-                .primaryConstructor(
-                    FunSpec.constructorBuilder()
-                    .addParameter("id", String::class).build())
-                .addProperty(PropertySpec.builder("id", String::class)
-                    .initializer("id")
-                    .build())
-                .addModifiers(KModifier.DATA)
-                .superclass(baseEvent)
-                .build()
-        )
-            .build()
-    }
+    val edges = graph.edges.values
+        .map { it.getAttribute("label").toString() }
+        .toSet()
 
-    graph.edges.values.forEach { edge ->
+    edges
+        .forEach { name ->
+            file.addType(
+                TypeSpec.classBuilder(name.toClassName())
+                    .primaryConstructor(
+                        FunSpec.constructorBuilder()
+                            .addParameter("id", String::class).build()
+                    )
+                    .addProperty(
+                        PropertySpec.builder("id", String::class)
+                            .initializer("id")
+                            .build()
+                    )
+                    .addModifiers(KModifier.DATA)
+                    .superclass(baseEvent)
+                    .build()
+            )
+                .build()
+        }
+
+    edges.forEach { edge ->
         file.addFunction(
-            FunSpec.builder(edge.getAttribute("label").toString() + "Command")
+            FunSpec.builder(edge + "Command")
                 .addParameter("state", stateBase)
                 .returns(baseEvent)
                 .addStatement("TODO()", className)

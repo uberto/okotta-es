@@ -7,11 +7,11 @@ import java.io.File
 
 fun main(){
 
-    val g = parseDotFile("/home/ubertobarbini/svi/kotlin/okotta-es/codegen/examples/helpdesk.dot")
+    val g = parseDotFile("codegen/examples/helpdesk.dot")
 
     val f = emitKotlinCode(g)
 
-    f.writeTo(File("generated"))
+    f.writeTo(File("codegen/generated"))
 
 }
 
