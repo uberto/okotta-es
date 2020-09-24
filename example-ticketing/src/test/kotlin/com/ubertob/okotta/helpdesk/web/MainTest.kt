@@ -1,7 +1,7 @@
 package com.ubertob.okotta.helpdesk.web
 
 import com.ubertob.okotta.helpdesk.domain.TicketCommandHandler
-import com.ubertob.okotta.helpdesk.domain.TicketQueryRunner
+import com.ubertob.okotta.helpdesk.domain.TicketsProjection
 import org.http4k.client.OkHttp
 
 
@@ -18,10 +18,7 @@ internal class MainTest {
 
     @Test
     fun `server can start`(){
-        val commandHandler = TicketCommandHandler() //eventStore
-        val queryHandler = TicketQueryRunner() //streamer::fetchAfter
-
-        val server = HelpDesk(queryHandler, commandHandler).asServer(Jetty(8081))
+        val server = helpDeskBuilder().asServer(Jetty(8081))
 
         server.start()
 

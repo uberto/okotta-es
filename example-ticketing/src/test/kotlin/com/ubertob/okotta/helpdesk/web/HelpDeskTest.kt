@@ -6,10 +6,7 @@ import org.junit.jupiter.api.Assertions.*
 
 internal class HelpDeskTest {
 
-    fun `test somethign`(){
-        val commandHandler = TicketCommandHandler() //eventStore
-        val queryHandler = TicketQueryRunner() //streamer::fetchAfter
-
-        val handler = HelpDesk(queryHandler, commandHandler)
+    fun `test something`(){
+        val handler = helpDeskBuilder()
     }
 }

@@ -1,5 +1,5 @@
 package com.ubertob.okotta.helpdesk.domain
 
-class TicketQueryRunner {
+class TicketEventStore {
 
 }

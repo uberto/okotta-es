@@ -1,11 +1,13 @@
 package com.ubertob.okotta.helpdesk.web
 
+import com.ubertob.okotta.helpdesk.domain.TicketCommandHandler
+import com.ubertob.okotta.helpdesk.domain.TicketsProjection
 import org.http4k.core.*
 import org.http4k.routing.bind
 import org.http4k.routing.routes
 
 
-class HelpDesk(queryHandler: Any, commandHandler: Any): HttpHandler {
+class HelpDesk(val ticketsProjection: TicketsProjection, val commandHandler: TicketCommandHandler): HttpHandler {
 
     val httpHandler = routes(
         "/ping" bind Method.GET to { Response(Status.OK).body("pong") },

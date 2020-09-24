@@ -2,70 +2,73 @@ package com.example.events
 
 import kotlin.String
 
-sealed class HelpdeskState
+sealed class TicketState
 
 data class Done(
   val id: String
-) : HelpdeskState()
+) : TicketState()
 
 data class InBacklog(
   val id: String
-) : HelpdeskState()
+) : TicketState()
 
 data class InProgress(
   val id: String
-) : HelpdeskState()
+) : TicketState()
 
 data class OnHold(
   val id: String
-) : HelpdeskState()
+) : TicketState()
 
 data class Start(
   val id: String
-) : HelpdeskState()
+) : TicketState()
 
-sealed class HelpdeskEvent
+sealed class TicketEvent
 
 data class Started(
   val id: String
-) : HelpdeskEvent()
+) : TicketEvent()
 
 data class Blocked(
   val id: String
-) : HelpdeskEvent()
+) : TicketEvent()
 
 data class Completed(
   val id: String
-) : HelpdeskEvent()
+) : TicketEvent()
 
 data class Updated(
   val id: String
-) : HelpdeskEvent()
+) : TicketEvent()
 
 data class Created(
   val id: String
-) : HelpdeskEvent()
+) : TicketEvent()
 
-fun StartedCommand(state: HelpdeskState): HelpdeskEvent {
-  TODO()
-}
 
-fun BlockedCommand(state: HelpdeskState): HelpdeskEvent {
-  TODO()
-}
 
-fun CompletedCommand(state: HelpdeskState): HelpdeskEvent {
-  TODO()
-}
-
-fun UpdatedCommand(state: HelpdeskState): HelpdeskEvent {
-  TODO()
-}
-
-fun BlockedCommand(state: HelpdeskState): HelpdeskEvent {
-  TODO()
-}
-
-fun CreatedCommand(state: HelpdeskState): HelpdeskEvent {
-  TODO()
-}
+sealed class TicketCommand
+//fun StartedCommand(state: TicketState): TicketCommand() {
+//  TODO()
+//}
+//
+//fun BlockedCommand(state: TicketState): TicketCommand() {
+//  TODO()
+//}
+//
+//fun CompletedCommand(state: TicketState): TicketCommand() {
+//  TODO()
+//}
+//
+//fun UpdatedCommand(state: TicketState): TicketCommand() {
+//  TODO()
+//}
+//
+//fun BlockedCommand(state: TicketState): TicketCommand() {
+//  TODO()
+//}
+//
+//fun CreatedCommand(state: TicketState): TicketCommand() {
+//  TODO()
+//}
