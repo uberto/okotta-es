@@ -1,4 +1,4 @@
-digraph helpdesk {
+digraph ticket {
 Start -> InBacklog[label="Created"]; 
 InBacklog -> InProgress[label="Started"]; 
 InProgress -> InProgress[label="Assigned"]; 
