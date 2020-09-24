@@ -1,54 +1,57 @@
 package com.example.events
 
-import kotlin.String
+import com.ubertob.okotta.helpdesk.lib.EntityEvent
+import com.ubertob.okotta.helpdesk.lib.EntityState
 
-sealed class TicketState
+sealed class TicketState : EntityState
 
 data class Done(
-  val id: String
+  override val entityKey: String
 ) : TicketState()
 
 data class InBacklog(
-  val id: String
+  override val entityKey: String
 ) : TicketState()
 
 data class InProgress(
-  val id: String
+  override val entityKey: String
 ) : TicketState()
 
 data class OnHold(
-  val id: String
+  override val entityKey: String
 ) : TicketState()
 
 data class Start(
-  val id: String
+  override val entityKey: String
 ) : TicketState()
 
-sealed class TicketEvent
+
+sealed class TicketEvent : EntityEvent
 
 data class Started(
-  val id: String
+  override val entityKey: String
 ) : TicketEvent()
 
 data class Blocked(
-  val id: String
+  override val entityKey: String
 ) : TicketEvent()
 
 data class Completed(
-  val id: String
+  override val entityKey: String
 ) : TicketEvent()
 
 data class Updated(
-  val id: String
+  override val entityKey: String
 ) : TicketEvent()
 
 data class Created(
-  val id: String
+  override val entityKey: String
 ) : TicketEvent()
 
 
 
 sealed class TicketCommand
+
 //fun StartedCommand(state: TicketState): TicketCommand() {
 //  TODO()
 //}

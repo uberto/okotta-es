@@ -13,11 +13,10 @@ fun main() {
 }
 
 fun helpDeskBuilder(): HelpDesk {
-    //    val streamer = TicketEventStreamerInMemory()
     val eventStore = TicketEventStore()
 
     val commandHandler = TicketCommandHandler(eventStore)
-    val ticketProjection = TicketsProjection() //streamer::fetchAfter
+    val ticketProjection = TicketsProjection(eventStore::fetchAfter)
 
     val helpDesk = HelpDesk(ticketProjection, commandHandler)
     return helpDesk

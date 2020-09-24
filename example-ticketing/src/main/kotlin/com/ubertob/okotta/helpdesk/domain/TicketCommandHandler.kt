@@ -2,7 +2,6 @@ package com.ubertob.okotta.helpdesk.domain
 
 import com.example.events.TicketCommand
 import com.example.events.TicketEvent
-import com.example.events.TicketState
 
 
 class TicketCommandHandler(
@@ -10,7 +9,10 @@ class TicketCommandHandler(
 ) : (TicketCommand) -> List<TicketEvent> {
 
     override fun invoke(command: TicketCommand): List<TicketEvent> {
-        return TODO("not implemented")
+        val events: List<TicketEvent> = TODO() //when(command){}
+
+        eventStore.store(events)
+        return events
     }
 
 }
