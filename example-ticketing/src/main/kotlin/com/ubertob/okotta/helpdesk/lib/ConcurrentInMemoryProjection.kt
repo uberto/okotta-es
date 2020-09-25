@@ -11,7 +11,10 @@ data class ConcurrentInMemoryProjection<R : Any, E : EntityEvent>(
 
     private val lastEventRef: AtomicReference<EventSeq> = AtomicReference(EventSeq(-1))
 
-    override fun allRows(): Collection<R> = rowsReference.get().values
+    override fun allRows(): Collection<R> {
+        update()
+        return rowsReference.get().values
+    }
 
     override fun applyDelta(eventSeq: EventSeq, deltas: List<DeltaRow<R>>) {
         deltas.forEach { delta ->

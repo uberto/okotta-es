@@ -3,13 +3,26 @@ package com.ubertob.okotta.helpdesk.domain
 import com.example.events.*
 import com.ubertob.okotta.helpdesk.lib.*
 
-data class TicketsProjectionRow(val ticketId: String, val active: Boolean)
+data class TicketsProjectionRow(
+    val ticketId: String,
+    val title: String,
+    val description: String,
+    val kanbanColumn: TicketStatus
+)
+
+enum class TicketStatus {
+    Backlog, InDevelopment, Blocked, Done
+}
 
 class TicketsProjection(eventFetcher: FetchStoredEvents<TicketEvent>) :
     InMemoryProjection<TicketsProjectionRow, TicketEvent> by ConcurrentInMemoryProjection(
         eventFetcher,
         ::eventProjector
     ) {
+
+    fun `get single ticket`(ticketId: String): TicketsProjectionRow? =
+        allRows().firstOrNull { it.ticketId == ticketId }
+
 
     companion object {
         fun eventProjector(e: TicketEvent): List<DeltaRow<TicketsProjectionRow>> =
@@ -21,7 +34,10 @@ class TicketsProjection(eventFetcher: FetchStoredEvents<TicketEvent>) :
 //            is ListPutOnHold -> UpdateRow(e.rowId()) { it.copy(active = false) }
 //            is ListReleased -> UpdateRow(e.rowId()) { it.copy(active = true) }
 //            is ListClosed -> DeleteRow(e.rowId())
-                is Started -> TODO()
+                is Started -> CreateRow(
+                    e.rowId(),
+                    TicketsProjectionRow(e.entityKey, e.title, e.description, TicketStatus.Backlog)
+                )
                 is Blocked -> TODO()
                 is Completed -> TODO()
                 is Updated -> TODO()

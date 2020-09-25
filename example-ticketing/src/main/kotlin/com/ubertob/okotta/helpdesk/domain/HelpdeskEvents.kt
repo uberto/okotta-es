@@ -29,7 +29,9 @@ data class Start(
 sealed class TicketEvent : EntityEvent
 
 data class Started(
-  override val entityKey: String
+  override val entityKey: String,
+  val title: String,
+  val description: String
 ) : TicketEvent()
 
 data class Blocked(
@@ -49,8 +51,9 @@ data class Created(
 ) : TicketEvent()
 
 
-
 sealed class TicketCommand
+
+data class CommandAddToBacklog(val title: String, val description: String) : TicketCommand()
 
 //fun StartedCommand(state: TicketState): TicketCommand() {
 //  TODO()
