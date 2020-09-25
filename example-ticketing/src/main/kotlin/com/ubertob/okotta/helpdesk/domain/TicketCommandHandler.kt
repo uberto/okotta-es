@@ -1,15 +1,15 @@
 package com.ubertob.okotta.helpdesk.domain
 
-import com.example.events.CommandAddToBacklog
-import com.example.events.Started
-import com.example.events.TicketCommand
-import com.example.events.TicketEvent
+import java.time.Instant
 import java.util.*
 
 
 class TicketCommandHandler(
     val eventStore: TicketEventStore
 ) : (TicketCommand) -> List<TicketEvent> {
+
+    fun getTicket(ticketId: String): TicketState =
+        eventStore.fetchByEntity(ticketId).fold()
 
     override fun invoke(command: TicketCommand): List<TicketEvent> {
         val events: List<TicketEvent> = evaluateCommand(command)
@@ -20,11 +20,19 @@ class TicketCommandHandler(
 
     private fun evaluateCommand(command: TicketCommand): List<TicketEvent> =
         when (command) {
-            is CommandAddToBacklog -> Started(
+            is CommandAddToBacklog -> Created(
                 entityKey = UUID.randomUUID().toString(),
                 title = command.title,
                 description = command.description
             ).toSingleList()  //todo add check if ticket title already exist?
+            is CommandStartWork -> when (val ticket = getTicket(command.id)) {
+                is InBacklog -> Started(ticket.entityKey, command.assignee, Instant.now()).toSingleList()
+                InitialState,
+                is Done,
+                is InProgress,
+                is OnHold,
+                is InvalidState -> throw RuntimeException("Invalid state! $ticket")
+            }
         }
 
 }

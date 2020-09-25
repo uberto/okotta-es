@@ -5,8 +5,8 @@ interface EntityEvent {
     val entityKey: String
 }
 
-interface EntityState {
-    val entityKey: String
+interface EntityState<E : EntityEvent> {
+    fun combine(event: E): EntityState<E>
 }
 
 interface EventStore<E : EntityEvent> {
