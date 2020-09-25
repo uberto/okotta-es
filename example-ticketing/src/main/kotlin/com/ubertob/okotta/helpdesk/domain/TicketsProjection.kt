@@ -3,7 +3,6 @@ package com.ubertob.okotta.helpdesk.domain
 import com.ubertob.okotta.helpdesk.lib.*
 
 data class TicketsProjectionRow(
-    val ticketId: String,
     val title: String,
     val description: String,
     val kanbanColumn: TicketStatus,
@@ -20,8 +19,8 @@ class TicketsProjection(eventFetcher: FetchStoredEvents<TicketEvent>) :
         ::eventProjector
     ) {
 
-    fun `get single ticket`(ticketId: String): TicketsProjectionRow? =
-        allRows().firstOrNull { it.ticketId == ticketId }
+    fun getTicket(ticketId: String): TicketsProjectionRow? =
+        allRows().get(RowId(ticketId))
 
 
     companion object {
@@ -29,7 +28,7 @@ class TicketsProjection(eventFetcher: FetchStoredEvents<TicketEvent>) :
             when (e) {
                 is Created -> CreateRow(
                     e.rowId(),
-                    TicketsProjectionRow(e.entityKey, e.title, e.description, TicketStatus.Backlog, null)
+                    TicketsProjectionRow(e.title, e.description, TicketStatus.Backlog, null)
                 )
                 is Started -> UpdateRow(e.rowId()) { r: TicketsProjectionRow ->
                     r.copy(kanbanColumn = TicketStatus.InDevelopment, assignee = e.userId)

@@ -36,6 +36,6 @@ data class UpdateRow<R : Any>(val rowId: RowId, val updateRow: (R) -> R) : Delta
 
 
 interface InMemoryProjection<R : Any, E : EntityEvent> : Projection<R, E> {
-    fun allRows(): Collection<R>
+    fun allRows(): Map<RowId, R>
 }
 

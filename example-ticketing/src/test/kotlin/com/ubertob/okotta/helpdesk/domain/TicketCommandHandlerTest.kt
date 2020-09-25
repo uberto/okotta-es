@@ -19,10 +19,9 @@ internal class TicketCommandHandlerTest {
 
         expectThat(event).isA<Created>()
 
-        expectThat(p.`get single ticket`(event.entityKey))
+        expectThat(p.getTicket(event.entityKey))
             .isEqualTo(
                 TicketsProjectionRow(
-                    ticketId = event.entityKey,
                     title = "my title",
                     description = "doing some stuff",
                     kanbanColumn = TicketStatus.Backlog
@@ -42,10 +41,9 @@ internal class TicketCommandHandlerTest {
 
         expectThat(event).isA<Started>()
 
-        expectThat(p.`get single ticket`(id))
+        expectThat(p.getTicket(id))
             .isEqualTo(
                 TicketsProjectionRow(
-                    ticketId = id,
                     title = "my title",
                     description = "doing some stuff",
                     kanbanColumn = TicketStatus.InDevelopment,
