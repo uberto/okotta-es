@@ -1,10 +1,6 @@
 # Project exclude paths
 /.gradle/
 /.idea/
-/codegen/build/
-/codegen/out/
+/*/build/
+/*/out/
 /codegen/generated/
-/core/build/
-/core/out/
-/example-ticketing/build/
-/example-ticketing/out/
