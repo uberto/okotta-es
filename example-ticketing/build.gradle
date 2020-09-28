@@ -16,6 +16,7 @@ dependencies {
     implementation "org.http4k:http4k-core:${http4kVersion}"
     implementation "org.http4k:http4k-server-jetty:${http4kVersion}"
 
+    implementation "com.fasterxml.jackson.module:jackson-module-kotlin:${jacksonVersion}"
 
     testRuntime "org.junit.jupiter:junit-jupiter-engine:${junitVersion}"
     testRuntime "org.junit.platform:junit-platform-launcher:${junitLauncherVersion}"
