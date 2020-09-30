@@ -4,56 +4,10 @@ import com.ubertob.okotta.helpdesk.lib.EntityEvent
 import com.ubertob.okotta.helpdesk.lib.EntityState
 import java.time.Instant
 
-sealed class TicketState : EntityState<TicketEvent> {
-  abstract override fun combine(event: TicketEvent): TicketState
-}
-
-
-data class InvalidState(val id: String, val prevState: TicketState, val event: TicketEvent) : TicketState() {
-  override fun combine(event: TicketEvent): TicketState = this //ignore other events
-}
-
-object InitialState : TicketState() {
-  override fun combine(event: TicketEvent): TicketState = when (event) {
-    is Created -> InBacklog(event.entityKey)
-    else -> InvalidState(event.entityKey, this, event)
-  }
-}
-
-data class InBacklog(
-  val entityKey: String
-) : TicketState() {
-  override fun combine(event: TicketEvent): TicketState = when(event) {
-    is Started -> InProgress(event.entityKey)
-    else -> InvalidState(event.entityKey, this, event)
-  }
-}
-
-data class InProgress(
-  val entityKey: String
-) : TicketState() {
-  override fun combine(event: TicketEvent): TicketState {
-    return TODO("not implemented")
-  }
-}
-
-data class Done(
-  val entityKey: String
-) : TicketState() {
-  override fun combine(event: TicketEvent): TicketState {
-    return TODO("not implemented")
-  }
-}
-
-
-data class OnHold(
-  val entityKey: String
-) : TicketState() {
-  override fun combine(event: TicketEvent): TicketState {
-    return TODO("not implemented")
-  }
-}
-
+// =========================================================================================
+// TicketEvents are recorded in the event store and tell us what happened to an entity and
+// so are expressed in the past tense
+// =========================================================================================
 
 sealed class TicketEvent : EntityEvent
 
@@ -81,9 +35,73 @@ data class Updated(
   override val entityKey: String
 ) : TicketEvent()
 
+// =========================================================================================
+// TicketState reconstructs the current view of an entity from a stream of recorded events
+// and so are expressed in the present tense.
+//
+// We start with an initial state and fold the stream of events as follows:
+// (current state + recorded event) -> new state
+// =========================================================================================
+
 fun Iterable<TicketEvent>.fold(): TicketState =
   this.fold(InitialState as TicketState) { acc, e -> acc.combine(e) }
 
+sealed class TicketState : EntityState<TicketEvent> {
+  abstract override fun combine(event: TicketEvent): TicketState
+}
+
+data class InvalidState(val id: String, val prevState: TicketState, val event: TicketEvent) : TicketState() {
+  override fun combine(event: TicketEvent): TicketState = this //ignore other events
+}
+
+object InitialState : TicketState() {
+  override fun combine(event: TicketEvent): TicketState = when (event) {
+    is Created -> InBacklog(event.entityKey)
+    else -> InvalidState(event.entityKey, this, event)
+  }
+}
+
+data class InBacklog(
+  val entityKey: String
+) : TicketState() {
+  override fun combine(event: TicketEvent): TicketState = when(event) {
+    is Started -> InProgress(event.entityKey)
+    else -> InvalidState(event.entityKey, this, event)
+  }
+}
+
+data class InProgress(
+  val entityKey: String
+) : TicketState() {
+  override fun combine(event: TicketEvent): TicketState {
+    TODO("not implemented")
+  }
+}
+
+data class Done(
+  val entityKey: String
+) : TicketState() {
+  override fun combine(event: TicketEvent): TicketState {
+    TODO("not implemented")
+  }
+}
+
+data class OnHold(
+  val entityKey: String
+) : TicketState() {
+  override fun combine(event: TicketEvent): TicketState {
+    TODO("not implemented")
+  }
+}
+
+// =========================================================================================
+// Commands model business domain actions on an entity and are expressed in present verb
+// tense.
+//
+// Commands will be sent to a command handler to validate the current entity state, perform
+// any business logic associated with the command action and then record the events that
+// happened.
+// =========================================================================================
 
 sealed class TicketCommand
 
@@ -93,26 +111,8 @@ data class CommandStartWork(val id: String, val assignee: UserId) : TicketComman
 
 data class CommandEndWork(val id: String) : TicketCommand()
 
-//fun StartedCommand(state: TicketState): TicketCommand() {
-//  TODO()
-//}
+//data class CommandPutOnHold(val id: String) : TicketCommand()
 //
-//fun BlockedCommand(state: TicketState): TicketCommand() {
-//  TODO()
-//}
+//data class CommandAssignToUser(val id: String, val assignee: UserId) : TicketCommand()
 //
-//fun CompletedCommand(state: TicketState): TicketCommand() {
-//  TODO()
-//}
-//
-//fun UpdatedCommand(state: TicketState): TicketCommand() {
-//  TODO()
-//}
-//
-//fun BlockedCommand(state: TicketState): TicketCommand() {
-//  TODO()
-//}
-//
-//fun CreatedCommand(state: TicketState): TicketCommand() {
-//  TODO()
-//}
+//data class CommandUpdateMetadata(val id: String, val title: String?, val description: String?) : TicketCommand()
