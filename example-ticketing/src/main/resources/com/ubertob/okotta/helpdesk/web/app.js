@@ -4,11 +4,22 @@ const {
   ThemeProvider,
   Typography,
   Container,
+  Collapse,
   makeStyles,
   createMuiTheme,
+  Button,
+  Grid,
   Box,
-  SvgIcon,
-  Link,
+  Paper,
+  Card,
+  CardHeader,
+  CardActions,
+  CardContent,
+  Avatar,
+  IconButton,
+  Icon,
+  AppBar,
+  Toolbar,
 } = MaterialUI;
 
 // Create a theme instance.
@@ -29,61 +40,152 @@ const theme = createMuiTheme({
   },
 });
 
-function LightBulbIcon(props) {
-  return (
-    <SvgIcon {...props}>
-      <path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7zm2.85 11.1l-.85.6V16h-4v-2.3l-.85-.6C7.8 12.16 7 10.63 7 9c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.63-.8 3.16-2.15 4.1z" />
-    </SvgIcon>
-  );
-}
-
 const useStyles = makeStyles(theme => ({
   root: {
     margin: theme.spacing(6, 0, 3),
   },
-  lightBulb: {
-    verticalAlign: 'middle',
-    marginRight: theme.spacing(1),
+  title: {
+    flexGrow: 1,
+  },
+  kanbanCard: {
+    margin: theme.spacing(1),
+  },
+  expand: {
+    transform: 'rotate(0deg)',
+    marginLeft: 'auto',
+    transition: theme.transitions.create('transform', {
+      duration: theme.transitions.duration.shortest,
+    }),
+  },
+  expandOpen: {
+    marginLeft: 'auto',
+    transform: 'rotate(180deg)',
+    transition: theme.transitions.create('transform', {
+      duration: theme.transitions.duration.shortest,
+    }),
+  },
+  avatar: {
+    backgroundColor: colors.red[500],
   },
 }));
 
-function ProTip() {
+function KanbanBoard() {
+  const [ tickets, setTickets ] = React.useState(
+  [
+    //TODO: replace these with REST API data from helpdesk app
+    {
+        "title": "App crashes when clicking mouse on icon",
+        "description": "Customer was unable to reproduce this error and it only happened once",
+        "assignee": "Fred",
+        "kanban_column": "Done"
+    },
+    {
+        "title": "Cancel button doesn't work properly",
+        "description": "On the shopping cart page clicking the cancel button continues to checkout instead of closing the page",
+        "assignee": null,
+        "kanban_column": "Backlog"
+    },
+    {
+        "title": "Customer login issue",
+        "description": "Bob from Brentford was unable to login to his account this morning and would like a password reset",
+        "assignee": null,
+        "kanban_column": "Backlog"
+    }
+  ] );
   const classes = useStyles();
   return (
-    <Typography className={classes.root} color="textSecondary">
-      <LightBulbIcon className={classes.lightBulb} />
-      Pro tip: See more{' '}
-      <Link href="https://material-ui.com/getting-started/templates/">
-        templates
-      </Link>{' '}
-      on the Material-UI documentation.
-    </Typography>
-  );
+    <Grid container spacing={3} className={classes.root} direction="row" justify="center" alignItems="stretch">
+        <KanbanColumn name="Backlog" cardData={tickets.filter(it => it.kanban_column == "Backlog")} />
+        <KanbanColumn name="In Development" cardData={tickets.filter(it => it.kanban_column == "InDevelopment")} />
+        <KanbanColumn name="Completed" cardData={tickets.filter(it => it.kanban_column == "Done")} />
+    </Grid>
+    );
 }
 
-function Copyright() {
+function KanbanColumn(props) {
+    return (
+        <Grid item xs={4}>
+            <Paper elevation={2}>
+                <Typography variant="h6" component="h6">{props.name}</Typography>
+                {props.cardData.map(card => (
+                   <KanbanCard card={card}/>
+                ))}
+            </Paper>
+        </Grid>
+    );
+}
+
+function KanbanCard(props) {
+    const classes = useStyles();
+    const [expanded, setExpanded] = React.useState(false);
+    const handleExpandClick = () => { setExpanded(!expanded); };
+    const expandMoreClassName = expanded ? classes.expandOpen : classes.expand;
+    const card = props.card;
+    return (
+        <Card className={classes.kanbanCard}>
+            <CardHeader
+                title={card.title}
+                subheader={""}
+                avatar={
+                  <Avatar aria-label="assignee" className={card.assignee != null ? classes.avatar : null}>
+                    {card.assignee != null ? card.assignee.charAt(0).toUpperCase() : "-"}
+                  </Avatar>
+                }
+                action={
+                  <IconButton aria-label="settings">
+                    <Icon>more_vert</Icon>
+                  </IconButton>
+                }
+            />
+            <CardActions disableSpacing>
+                <IconButton aria-label="move to next">
+                    <Icon>switch_right</Icon>
+                </IconButton>
+                <IconButton
+                    onClick={handleExpandClick}
+                    aria-expanded={expanded}
+                    className={expandMoreClassName}
+                    aria-label="show more">
+                    <Icon>expand_more</Icon>
+                </IconButton>
+            </CardActions>
+            <Collapse in={expanded} timeout="auto" unmountOnExit>
+                <CardContent>
+                   <Typography paragraph>{card.description}</Typography>
+                </CardContent>
+            </Collapse>
+        </Card>
+    );
+}
+
+function TopNavBar() {
+  const classes = useStyles();
   return (
-    <Typography variant="body2" color="textSecondary" align="center">
-      {'Copyright © '}
-      <Link color="inherit" href="https://material-ui.com/">
-        Your Website
-      </Link>{' '}
-      {new Date().getFullYear()}
-      {'.'}
-    </Typography>
+    <div>
+      <AppBar position="static">
+        <Toolbar>
+          <IconButton edge="start" color="inherit" aria-label="menu">
+            <Icon>menu</Icon>
+          </IconButton>
+          <Typography variant="h6" className={classes.title}>
+            Helpdesk Tickets
+          </Typography>
+          <div>
+              <IconButton color="inherit" aria-label="new item">
+                <Icon>add</Icon>
+              </IconButton>
+          </div>
+        </Toolbar>
+      </AppBar>
+    </div>
   );
 }
 
 function App() {
   return (
-    <Container maxWidth="sm">
-      <div style={{ marginTop: 24, }}>
-        <Typography variant="h4" component="h1" gutterBottom>
-          CDN v4-beta example
-        </Typography>
-        <ProTip />
-        <Copyright />
-      </div>
+    <Container maxWidth="lg">
+      <TopNavBar/>
+      <KanbanBoard/>
     </Container>
   );
 }
