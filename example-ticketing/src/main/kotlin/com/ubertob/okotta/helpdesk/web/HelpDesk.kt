@@ -4,15 +4,18 @@ import com.ubertob.okotta.helpdesk.domain.*
 import org.http4k.core.*
 import org.http4k.core.Status.Companion.NO_CONTENT
 import org.http4k.core.Status.Companion.OK
+import org.http4k.routing.ResourceLoader.Companion.Classpath
 import org.http4k.routing.bind
 import org.http4k.routing.path
 import org.http4k.routing.routes
+import org.http4k.routing.static
 
 
 class HelpDesk(val ticketsProjection: TicketsProjection, val commandHandler: TicketCommandHandler): HttpHandler {
 
     val httpHandler = routes(
         "/ping" bind Method.GET to { Response(OK).body("pong") },
+        "/ui" bind static(Classpath("/com/ubertob/okotta/helpdesk/web")),
         "/ticket" bind Method.POST to ::addTicket,
         "/tickets" bind Method.GET to ::allTickets,
         "/ticket/{ticketId}" bind Method.GET to ::getTicket,
