@@ -1,5 +1,6 @@
 plugins {
     id 'org.jetbrains.kotlin.jvm'
+    id "application"
 }
 
 compileKotlin {
@@ -31,3 +32,6 @@ test {
     useJUnitPlatform()
 }
 
+application {
+    mainClassName = "com.ubertob.okotta.helpdesk.web.MainKt"
+}
