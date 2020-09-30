@@ -12,7 +12,6 @@ compileTestKotlin {
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
-    implementation "org.junit.jupiter:junit-jupiter:${junitVersion}"
 
     implementation "org.http4k:http4k-core:${http4kVersion}"
     implementation "org.http4k:http4k-server-jetty:${http4kVersion}"
@@ -22,6 +21,7 @@ dependencies {
     testRuntime "org.junit.jupiter:junit-jupiter-engine:${junitVersion}"
     testRuntime "org.junit.platform:junit-platform-launcher:${junitLauncherVersion}"
 
+    testImplementation "org.junit.jupiter:junit-jupiter:${junitVersion}"
     testImplementation "com.ubertob.pesticide:pesticide-core:${pesticideVersion}"
     testImplementation "io.strikt:strikt-core:${striktVersion}"
     testImplementation "org.http4k:http4k-client-okhttp:${http4kVersion}"
