@@ -23,8 +23,9 @@ object InitialState : TicketState() {
 data class InBacklog(
   val entityKey: String
 ) : TicketState() {
-  override fun combine(event: TicketEvent): TicketState {
-    return TODO("not implemented")
+  override fun combine(event: TicketEvent): TicketState = when(event) {
+    is Started -> InProgress(event.entityKey)
+    else -> InvalidState(event.entityKey, this, event)
   }
 }
 
