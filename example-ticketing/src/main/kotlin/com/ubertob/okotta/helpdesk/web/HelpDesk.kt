@@ -1,9 +1,8 @@
 package com.ubertob.okotta.helpdesk.web
 
-import com.ubertob.okotta.helpdesk.domain.CommandAddToBacklog
-import com.ubertob.okotta.helpdesk.domain.TicketCommandHandler
-import com.ubertob.okotta.helpdesk.domain.TicketsProjection
+import com.ubertob.okotta.helpdesk.domain.*
 import org.http4k.core.*
+import org.http4k.core.Status.Companion.NO_CONTENT
 import org.http4k.core.Status.Companion.OK
 import org.http4k.routing.bind
 import org.http4k.routing.path
@@ -14,8 +13,9 @@ class HelpDesk(val ticketsProjection: TicketsProjection, val commandHandler: Tic
 
     val httpHandler = routes(
         "/ping" bind Method.GET to { Response(OK).body("pong") },
+        "/ticket" bind Method.POST to ::addTicket,
         "/ticket/{ticketId}" bind Method.GET to ::getTicket,
-        "/ticket" bind Method.POST to ::addTicket
+        "/ticket/{ticketId}/start" bind Method.POST to ::startTicket,
     )
 
     private fun addTicket(request: Request): Response {
@@ -28,7 +28,21 @@ class HelpDesk(val ticketsProjection: TicketsProjection, val commandHandler: Tic
     private fun getTicket(request: Request): Response {
         val ticketId = request.path("ticketId") ?: return Response(Status.BAD_REQUEST)
         val found = ticketsProjection.getTicket(ticketId) ?: return Response(Status.NOT_FOUND)
-        return Response(OK).body(GetTicketResponse(found.title, found.description, found.kanbanColumn.name).serialise())
+        return Response(OK).body(
+            GetTicketResponse(
+                title = found.title,
+                description = found.description,
+                kanban_column = found.kanbanColumn.name,
+                assignee = found.assignee?.name
+            ).serialise()
+        )
+    }
+
+    private fun startTicket(request: Request): Response {
+        val ticketId = request.path("ticketId") ?: return Response(Status.BAD_REQUEST)
+        val startTicket: StartTicketRequest = request.bodyString().deserialise()
+        commandHandler(CommandStartWork(ticketId, UserId(startTicket.assignee)))
+        return Response(NO_CONTENT)
     }
 
     override fun invoke(req: Request): Response  =
@@ -39,4 +53,5 @@ class HelpDesk(val ticketsProjection: TicketsProjection, val commandHandler: Tic
 // these types define the property names of the serialised json request/response objects
 data class AddTicketRequest(val title: String, val description: String): JsonSerialisable
 data class AddTicketResponse(val id: String): JsonSerialisable
-data class GetTicketResponse(val title: String, val description: String, val kanban_column: String): JsonSerialisable
+data class StartTicketRequest(val assignee: String): JsonSerialisable
+data class GetTicketResponse(val title: String, val description: String, val kanban_column: String, val assignee: String?): JsonSerialisable
