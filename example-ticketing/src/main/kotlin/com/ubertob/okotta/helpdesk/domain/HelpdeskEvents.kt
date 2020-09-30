@@ -90,6 +90,8 @@ data class CommandAddToBacklog(val title: String, val description: String) : Tic
 
 data class CommandStartWork(val id: String, val assignee: UserId) : TicketCommand()
 
+data class CommandEndWork(val id: String) : TicketCommand()
+
 //fun StartedCommand(state: TicketState): TicketCommand() {
 //  TODO()
 //}

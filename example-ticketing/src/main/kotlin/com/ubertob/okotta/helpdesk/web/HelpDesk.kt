@@ -16,6 +16,7 @@ class HelpDesk(val ticketsProjection: TicketsProjection, val commandHandler: Tic
         "/ticket" bind Method.POST to ::addTicket,
         "/ticket/{ticketId}" bind Method.GET to ::getTicket,
         "/ticket/{ticketId}/start" bind Method.POST to ::startTicket,
+        "/ticket/{ticketId}/complete" bind Method.POST to ::completeTicket,
     )
 
     private fun addTicket(request: Request): Response {
@@ -42,6 +43,12 @@ class HelpDesk(val ticketsProjection: TicketsProjection, val commandHandler: Tic
         val ticketId = request.path("ticketId") ?: return Response(Status.BAD_REQUEST)
         val startTicket: StartTicketRequest = request.bodyString().deserialise()
         commandHandler(CommandStartWork(ticketId, UserId(startTicket.assignee)))
+        return Response(NO_CONTENT)
+    }
+
+    private fun completeTicket(request: Request): Response {
+        val ticketId = request.path("ticketId") ?: return Response(Status.BAD_REQUEST)
+        commandHandler(CommandEndWork(ticketId))
         return Response(NO_CONTENT)
     }
 

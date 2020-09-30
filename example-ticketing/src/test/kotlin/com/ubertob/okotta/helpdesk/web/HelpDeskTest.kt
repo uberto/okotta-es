@@ -2,6 +2,9 @@ package com.ubertob.okotta.helpdesk.web
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.ubertob.okotta.helpdesk.domain.CommandAddToBacklog
+import com.ubertob.okotta.helpdesk.domain.CommandStartWork
+import com.ubertob.okotta.helpdesk.domain.UserId
+import org.http4k.core.Method
 import org.http4k.core.Method.GET
 import org.http4k.core.Method.POST
 import org.http4k.core.Request
@@ -86,6 +89,34 @@ internal class HelpDeskTest {
                     "description": "description1",
                     "kanban_column" : "InDevelopment",
                     "assignee": "user96"
+                }"""
+            )
+        }
+    }
+
+    @Test
+    fun `complete a ticket`() {
+        // setup: create a ticket and start work on it
+        val id = handler.commandHandler(CommandAddToBacklog("title1", "description1")).first().entityKey
+        handler.commandHandler(CommandStartWork(id, UserId("user1")))
+
+        with(
+            handler(
+                Request(Method.POST, "/ticket/$id/complete")
+            )
+        ) {
+            expectThat(status).isEqualTo(NO_CONTENT)
+        }
+
+
+        with(handler(Request(GET, "/ticket/$id"))) {
+            expectThat(status).isEqualTo(OK)
+            bodyAsJson().assertIsEqualTo(
+                """{
+                    "title" : "title1",
+                    "description": "description1",
+                    "kanban_column" : "Done",
+                    "assignee" : "user1"
                 }"""
             )
         }

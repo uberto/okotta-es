@@ -33,6 +33,7 @@ class TicketCommandHandler(
                 is OnHold,
                 is InvalidState -> throw RuntimeException("Invalid state! $ticket")
             }
+            is CommandEndWork -> TODO()
         }
 
 }

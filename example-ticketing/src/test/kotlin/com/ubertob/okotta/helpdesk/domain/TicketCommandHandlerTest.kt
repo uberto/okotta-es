@@ -32,12 +32,10 @@ internal class TicketCommandHandlerTest {
 
     @Test
     fun `add a new ticket to backlog and started working on`() {
-        val c = CommandAddToBacklog("my title", "doing some stuff")
-        val id = ch(c).single().entityKey
         val developer = UserId("Frank")
 
-        val start = CommandStartWork(id, developer)
-        val event = ch(start).single()
+        val id = ch(CommandAddToBacklog("my title", "doing some stuff")).single().entityKey
+        val event = ch(CommandStartWork(id, developer)).single()
 
         expectThat(event).isA<Started>()
 
@@ -50,6 +48,26 @@ internal class TicketCommandHandlerTest {
                     assignee = developer
                 )
             )
+    }
 
+    @Test
+    fun `add a new ticket to backlog, work on it, and complete it`() {
+        val developer = UserId("Frank")
+
+        val id = ch(CommandAddToBacklog("my title", "doing some stuff")).single().entityKey
+        ch(CommandStartWork(id, developer))
+        val event = ch(CommandEndWork(id)).single()
+
+        expectThat(event).isA<Completed>()
+
+        expectThat(p.getTicket(id))
+            .isEqualTo(
+                TicketsProjectionRow(
+                    title = "my title",
+                    description = "doing some stuff",
+                    kanbanColumn = TicketStatus.Done,
+                    assignee = developer
+                )
+            )
     }
 }
