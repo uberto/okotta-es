@@ -48,11 +48,25 @@ internal class HelpDeskTest {
             expectThat(status).isEqualTo(OK)
             bodyAsJson().assertIsEqualTo(
                 """{
+                    "id": "$id",
                     "title": "title1",
                     "description": "description1",
                     "kanban_column" : "Backlog",
                     "assignee" : null
                 }"""
+            )
+        }
+
+        with(handler(Request(GET, "/tickets"))) {
+            expectThat(status).isEqualTo(OK)
+            bodyAsJson().assertIsEqualTo(
+                """[{
+                    "id": "$id",
+                    "title": "title1",
+                    "description": "description1",
+                    "kanban_column" : "Backlog",
+                    "assignee" : null
+                }]"""
             )
         }
     }
@@ -85,6 +99,7 @@ internal class HelpDeskTest {
             expectThat(status).isEqualTo(OK)
             bodyAsJson().assertIsEqualTo(
                 """{
+                    "id": "$id",
                     "title" : "title1",
                     "description": "description1",
                     "kanban_column" : "InDevelopment",
@@ -113,6 +128,7 @@ internal class HelpDeskTest {
             expectThat(status).isEqualTo(OK)
             bodyAsJson().assertIsEqualTo(
                 """{
+                    "id": "$id",
                     "title" : "title1",
                     "description": "description1",
                     "kanban_column" : "Done",

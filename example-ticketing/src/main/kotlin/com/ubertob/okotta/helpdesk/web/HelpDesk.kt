@@ -14,6 +14,7 @@ class HelpDesk(val ticketsProjection: TicketsProjection, val commandHandler: Tic
     val httpHandler = routes(
         "/ping" bind Method.GET to { Response(OK).body("pong") },
         "/ticket" bind Method.POST to ::addTicket,
+        "/tickets" bind Method.GET to ::allTickets,
         "/ticket/{ticketId}" bind Method.GET to ::getTicket,
         "/ticket/{ticketId}/start" bind Method.POST to ::startTicket,
         "/ticket/{ticketId}/complete" bind Method.POST to ::completeTicket,
@@ -31,12 +32,26 @@ class HelpDesk(val ticketsProjection: TicketsProjection, val commandHandler: Tic
         val found = ticketsProjection.getTicket(ticketId) ?: return Response(Status.NOT_FOUND)
         return Response(OK).body(
             GetTicketResponse(
+                id = ticketId,
                 title = found.title,
                 description = found.description,
                 kanban_column = found.kanbanColumn.name,
                 assignee = found.assignee?.name
             ).serialise()
         )
+    }
+
+    private fun allTickets(request: Request): Response {
+        val all = ticketsProjection.getTickets().map {
+            GetTicketResponse(
+                id = it.key.id,
+                title = it.value.title,
+                description = it.value.description,
+                kanban_column = it.value.kanbanColumn.name,
+                assignee = it.value.assignee?.name
+            )
+        }
+        return Response(OK).body(AllTicketsResponse(all).serialise())
     }
 
     private fun startTicket(request: Request): Response {
@@ -61,4 +76,5 @@ class HelpDesk(val ticketsProjection: TicketsProjection, val commandHandler: Tic
 data class AddTicketRequest(val title: String, val description: String): JsonSerialisable
 data class AddTicketResponse(val id: String): JsonSerialisable
 data class StartTicketRequest(val assignee: String): JsonSerialisable
-data class GetTicketResponse(val title: String, val description: String, val kanban_column: String, val assignee: String?): JsonSerialisable
+data class GetTicketResponse(val id: String, val title: String, val description: String, val kanban_column: String, val assignee: String?): JsonSerialisable
+class AllTicketsResponse(array: List<GetTicketResponse>): ArrayList<GetTicketResponse>(array), JsonSerialisable

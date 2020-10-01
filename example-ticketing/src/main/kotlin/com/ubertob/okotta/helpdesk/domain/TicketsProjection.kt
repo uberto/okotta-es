@@ -22,6 +22,9 @@ class TicketsProjection(eventFetcher: FetchStoredEvents<TicketEvent>) :
     fun getTicket(ticketId: String): TicketsProjectionRow? =
         allRows().get(RowId(ticketId))
 
+    fun getTickets(): Map<RowId, TicketsProjectionRow> =
+        allRows()
+
 
     companion object {
         fun eventProjector(e: TicketEvent): List<DeltaRow<TicketsProjectionRow>> =
