@@ -7,6 +7,12 @@ const {
   Collapse,
   makeStyles,
   createMuiTheme,
+  Dialog,
+  DialogTitle,
+  DialogContentText,
+  DialogContent,
+  DialogActions,
+  TextField,
   Button,
   Grid,
   Box,
@@ -158,8 +164,55 @@ function KanbanCard(props) {
     );
 }
 
+function NewTicketDialog(props) {
+  const classes = useStyles();
+  const handleClose = props.handleClose;
+  const open = props.open;
+  return (
+     <div>
+      <Dialog open={open} onClose={handleClose} aria-labelledby="new-ticket-title">
+        <DialogTitle id="new-ticket-title">New Ticket</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Create a new entry in the backlog.
+          </DialogContentText>
+          <TextField
+            autoFocus
+            margin="dense"
+            id="title"
+            label="Title"
+            type="text"
+            fullWidth
+          />
+          <TextField
+            autoFocus
+            margin="dense"
+            id="description"
+            label="Description"
+            type="text"
+            fullWidth
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleClose} color="primary">
+            Save
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </div>
+  );
+}
+
 function TopNavBar() {
   const classes = useStyles();
+
+  const [open, setOpen] = React.useState(false);
+  const handleClickOpen = () => { setOpen(true); };
+  const handleClose = () => { setOpen(false); };
+
   return (
     <div>
       <AppBar position="static">
@@ -171,9 +224,10 @@ function TopNavBar() {
             Helpdesk Tickets
           </Typography>
           <div>
-              <IconButton color="inherit" aria-label="new item">
+              <IconButton color="inherit" aria-label="new item" onClick={handleClickOpen}>
                 <Icon>add</Icon>
               </IconButton>
+              <NewTicketDialog handleClose={handleClose} open={open}/>
           </div>
         </Toolbar>
       </AppBar>
