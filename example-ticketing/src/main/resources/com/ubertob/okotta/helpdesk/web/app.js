@@ -75,29 +75,21 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
+// util function for synchronising rest data
+function useFetch(url) {
+  const [data, setData] = React.useState([]);
+
+  React.useEffect(() => {
+    fetch(url)
+      .then(response => response.json())
+      .then(data => setData(data));
+  }, []);
+
+  return data;
+}
+
 function KanbanBoard() {
-  const [ tickets, setTickets ] = React.useState(
-  [
-    //TODO: replace these with REST API data from helpdesk app
-    {
-        "title": "App crashes when clicking mouse on icon",
-        "description": "Customer was unable to reproduce this error and it only happened once",
-        "assignee": "Fred",
-        "kanban_column": "Done"
-    },
-    {
-        "title": "Cancel button doesn't work properly",
-        "description": "On the shopping cart page clicking the cancel button continues to checkout instead of closing the page",
-        "assignee": null,
-        "kanban_column": "Backlog"
-    },
-    {
-        "title": "Customer login issue",
-        "description": "Bob from Brentford was unable to login to his account this morning and would like a password reset",
-        "assignee": null,
-        "kanban_column": "Backlog"
-    }
-  ] );
+  const tickets = useFetch('http://localhost:8080/tickets');
   const classes = useStyles();
   return (
     <Grid container spacing={3} className={classes.root} direction="row" justify="center" alignItems="stretch">
