@@ -1,6 +1,7 @@
 package com.ubertob.okotta.helpdesk.web
 
-import com.fasterxml.jackson.databind.JsonNode
+import com.beust.klaxon.JsonArray
+import com.beust.klaxon.JsonObject
 import com.ubertob.okotta.helpdesk.domain.CommandAddToBacklog
 import com.ubertob.okotta.helpdesk.domain.CommandStartWork
 import com.ubertob.okotta.helpdesk.domain.UserId
@@ -12,6 +13,7 @@ import org.http4k.core.Status.Companion.NOT_FOUND
 import org.http4k.core.Status.Companion.NO_CONTENT
 import org.http4k.core.Status.Companion.OK
 import org.junit.jupiter.api.Test
+import strikt.api.Assertion
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
 import strikt.assertions.isNotNull
@@ -34,7 +36,7 @@ internal class HelpDeskTest {
             )
         ) {
             expectThat(status).isEqualTo(OK)
-            val jsonContent = bodyAsJson()
+            val jsonContent = bodyString().asJsonObject()
             expectThat(jsonContent["id"]).isNotNull()
         }
     }
@@ -46,26 +48,24 @@ internal class HelpDeskTest {
 
         with(handler(Request(GET, "/ticket/$id"))) {
             expectThat(status).isEqualTo(OK)
-            bodyAsJson().assertIsEqualTo(
+            expectThat(bodyString().asJsonObject()).isEquivalentTo(
                 """{
                     "id": "$id",
                     "title": "title1",
                     "description": "description1",
-                    "kanban_column" : "Backlog",
-                    "assignee" : null
+                    "kanban_column" : "Backlog"
                 }"""
             )
         }
 
         with(handler(Request(GET, "/tickets"))) {
             expectThat(status).isEqualTo(OK)
-            bodyAsJson().assertIsEqualTo(
+            expectThat(bodyString().asJsonArray()).isEquivalentToA(
                 """[{
                     "id": "$id",
                     "title": "title1",
                     "description": "description1",
-                    "kanban_column" : "Backlog",
-                    "assignee" : null
+                    "kanban_column" : "Backlog"
                 }]"""
             )
         }
@@ -97,7 +97,7 @@ internal class HelpDeskTest {
 
         with(handler(Request(GET, "/ticket/$id"))) {
             expectThat(status).isEqualTo(OK)
-            bodyAsJson().assertIsEqualTo(
+            expectThat(bodyString().asJsonObject()).isEquivalentTo(
                 """{
                     "id": "$id",
                     "title" : "title1",
@@ -129,7 +129,7 @@ internal class HelpDeskTest {
 
         with(handler(Request(GET, "/ticket/$id"))) {
             expectThat(status).isEqualTo(OK)
-            bodyAsJson().assertIsEqualTo(
+            expectThat(bodyString().asJsonObject()).isEquivalentTo(
                 """{
                     "id": "$id",
                     "title" : "title1",
@@ -159,7 +159,7 @@ internal class HelpDeskTest {
 
         with(handler(Request(GET, "/ticket/$id"))) {
             expectThat(status).isEqualTo(OK)
-            bodyAsJson().assertIsEqualTo(
+            expectThat(bodyString().asJsonObject()).isEquivalentTo(
                 """{
                     "id": "$id",
                     "title" : "title1",
@@ -172,8 +172,8 @@ internal class HelpDeskTest {
     }
 }
 
-fun JsonNode.assertIsEqualTo(expectedJson: String) {
-    val actualNormalised = toPrettyString()
-    val expectedNormalised = mapper.readTree(expectedJson).toPrettyString()
-    expectThat(actualNormalised).isEqualTo(expectedNormalised)
-}
+private fun Assertion.Builder<JsonObject>.isEquivalentTo(jsonString: String): Assertion.Builder<JsonObject> =
+    this.isEqualTo(jsonString.asJsonObject())
+
+private fun Assertion.Builder<JsonArray<*>>.isEquivalentToA(jsonString: String): Assertion.Builder<JsonArray<*>> =
+    this.isEqualTo(jsonString.asJsonArray())

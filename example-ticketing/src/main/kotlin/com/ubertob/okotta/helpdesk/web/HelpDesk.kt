@@ -22,7 +22,7 @@ class HelpDesk(val ticketsProjection: TicketsProjection, val commandHandler: Tic
     )
 
     private fun addTicket(request: Request): Response {
-        val add: AddTicketRequest = request.bodyString().deserialise()
+        val add: AddTicketRequest = request.bodyString().deserialise() ?: return Response(Status.BAD_REQUEST)
         return commandHandler(CommandAddToBacklog(add.title, add.description))
             .first().entityKey
             .let { Response(OK).body(AddTicketResponse(it).serialise()) }
@@ -44,7 +44,7 @@ class HelpDesk(val ticketsProjection: TicketsProjection, val commandHandler: Tic
 
     private fun assignTicket(request: Request): Response {
         val ticketId = request.path("ticketId") ?: return Response(Status.BAD_REQUEST)
-        val assign: AssignTicketRequest = request.bodyString().deserialise()
+        val assign: AssignTicketRequest = request.bodyString().deserialise() ?: return Response(Status.BAD_REQUEST)
 
         commandHandler(CommandAssignToUser(ticketId, assign.assignee.asUserId()))
         return Response(NO_CONTENT)
@@ -65,7 +65,7 @@ class HelpDesk(val ticketsProjection: TicketsProjection, val commandHandler: Tic
 
     private fun startTicket(request: Request): Response {
         val ticketId = request.path("ticketId") ?: return Response(Status.BAD_REQUEST)
-        val startTicket: StartTicketRequest = request.bodyString().deserialise()
+        val startTicket: StartTicketRequest = request.bodyString().deserialise() ?: return Response(Status.BAD_REQUEST)
         commandHandler(CommandStartWork(ticketId, startTicket.assignee.asUserId()))
         return Response(NO_CONTENT)
     }

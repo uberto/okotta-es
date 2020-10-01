@@ -1,20 +1,25 @@
 package com.ubertob.okotta.helpdesk.web
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
-import org.http4k.core.Response
+import com.beust.klaxon.JsonArray
+import com.beust.klaxon.JsonObject
+import com.beust.klaxon.Klaxon
+import com.beust.klaxon.Parser
 
-val mapper = jacksonObjectMapper()
+val klaxon = Klaxon()
 
 interface JsonSerialisable
 
-fun JsonSerialisable.serialise() : String =
-    mapper.writeValueAsString(this)
+fun JsonSerialisable.serialise(): String =
+    klaxon.toJsonString(this)
 
-inline fun <reified T: JsonSerialisable> String.deserialise(): T =
-    mapper.readValue(this)
+inline fun <reified T : JsonSerialisable> String.deserialise(): T? =
+    klaxon.parse<T>(this)
+
+val defaultParser = Parser.default()
 
 // used by tests
-fun Response.bodyAsJson(): JsonNode =
-    mapper.readTree(bodyString())
+fun String.asJsonObject(): JsonObject =
+    defaultParser.parse(StringBuilder(this)) as JsonObject
+
+fun String.asJsonArray(): JsonArray<*> =
+    defaultParser.parse(StringBuilder(this)) as JsonArray<*>
