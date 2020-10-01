@@ -88,8 +88,18 @@ function useFetch(url) {
   return data;
 }
 
-function KanbanBoard() {
-  const tickets = useFetch('http://localhost:8080/tickets');
+function postData(url, json) {
+    const requestOptions = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(json)
+    };
+    fetch(url, requestOptions)
+     .then(response => (response.status >= 400) ? alert("Failed: Response {response.status} {response.statusText}") : "");
+}
+
+function KanbanBoard(props) {
+  const tickets = props.tickets;
   const classes = useStyles();
   return (
     <Grid container spacing={3} className={classes.root} direction="row" justify="center" alignItems="stretch">
@@ -158,80 +168,91 @@ function KanbanCard(props) {
 
 function NewTicketDialog(props) {
   const classes = useStyles();
+  const isOpen = props.isOpen;
   const handleClose = props.handleClose;
-  const open = props.open;
+  const handleAddTicket = props.handleAddTicket;
+  const handleSave = (event) => {
+    event.preventDefault();
+    const form = event.target;
+    handleAddTicket(form.title.value, form.description.value);
+    return handleClose();
+  };
   return (
      <div>
-      <Dialog open={open} onClose={handleClose} aria-labelledby="new-ticket-title">
+      <Dialog open={isOpen} onClose={handleClose} aria-labelledby="new-ticket-title">
         <DialogTitle id="new-ticket-title">New Ticket</DialogTitle>
         <DialogContent>
           <DialogContentText>
             Create a new entry in the backlog.
           </DialogContentText>
-          <TextField
-            autoFocus
-            margin="dense"
-            id="title"
-            label="Title"
-            type="text"
-            fullWidth
-          />
-          <TextField
-            autoFocus
-            margin="dense"
-            id="description"
-            label="Description"
-            type="text"
-            fullWidth
-          />
+          <form id="new_ticket_form" onSubmit = {handleSave}>
+              <TextField
+                required
+                autoFocus
+                margin="dense"
+                id="title"
+                label="Title"
+                type="text"
+                fullWidth
+              />
+              <TextField
+                required
+                autoFocus
+                margin="dense"
+                id="description"
+                label="Description"
+                type="text"
+                fullWidth
+              />
+          </form>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={handleClose} color="primary">
-            Save
-          </Button>
+          <Button onClick={handleClose} color="primary">Cancel</Button>
+          <Button color="primary" type="submit" form="new_ticket_form">Save</Button>
         </DialogActions>
       </Dialog>
     </div>
   );
 }
 
-function TopNavBar() {
+function TopNavBar(props) {
   const classes = useStyles();
 
-  const [open, setOpen] = React.useState(false);
+  const [isOpen, setOpen] = React.useState(false);
   const handleClickOpen = () => { setOpen(true); };
   const handleClose = () => { setOpen(false); };
+  const handleAddTicket = props.addTicket;
 
   return (
     <div>
       <AppBar position="static">
         <Toolbar>
-          <IconButton edge="start" color="inherit" aria-label="menu">
-            <Icon>menu</Icon>
-          </IconButton>
           <Typography variant="h6" className={classes.title}>
-            Helpdesk Tickets
+              Helpdesk Tickets
           </Typography>
-          <div>
-              <IconButton color="inherit" aria-label="new item" onClick={handleClickOpen}>
-                <Icon>add</Icon>
-              </IconButton>
-              <NewTicketDialog handleClose={handleClose} open={open}/>
-          </div>
+          <IconButton color="inherit" aria-label="new item" onClick={handleClickOpen}>
+              <Icon>add</Icon>
+          </IconButton>
         </Toolbar>
       </AppBar>
+      <NewTicketDialog
+         handleClose={handleClose}
+         handleAddTicket={handleAddTicket}
+         isOpen={isOpen}
+      />
     </div>
   );
 }
 
 function App() {
+  const tickets = useFetch('http://localhost:8080/tickets');
+  const addTicket = (title, description) => {
+      postData("http://localhost:8080/ticket", { "title": title, "description": description})
+  }
   return (
     <Container maxWidth="lg">
-      <TopNavBar/>
-      <KanbanBoard/>
+      <TopNavBar addTicket={addTicket} />
+      <KanbanBoard tickets={tickets} />
     </Container>
   );
 }
