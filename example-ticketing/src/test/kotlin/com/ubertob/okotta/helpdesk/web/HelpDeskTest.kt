@@ -110,6 +110,39 @@ internal class HelpDeskTest {
     }
 
     @Test
+    fun `assign a different user to a ticket`() {
+        // setup: create a ticket and start work on it
+        val id = handler.commandHandler(CommandAddToBacklog("title1", "description1")).first().entityKey
+        handler.commandHandler(CommandStartWork(id, UserId("user1")))
+
+        with(
+            handler(
+                Request(POST, "/ticket/$id/assign").body(
+                    """{
+                        "assignee" : "user2"
+                    }"""
+                )
+            )
+        ) {
+            expectThat(status).isEqualTo(NO_CONTENT)
+        }
+
+        with(handler(Request(GET, "/ticket/$id"))) {
+            expectThat(status).isEqualTo(OK)
+            bodyAsJson().assertIsEqualTo(
+                """{
+                    "id": "$id",
+                    "title" : "title1",
+                    "description": "description1",
+                    "kanban_column" : "InDevelopment",
+                    "assignee": "user2"
+                }"""
+            )
+        }
+    }
+
+
+    @Test
     fun `complete a ticket`() {
         // setup: create a ticket and start work on it
         val id = handler.commandHandler(CommandAddToBacklog("title1", "description1")).first().entityKey

@@ -23,12 +23,18 @@ data class Started(
   val time: Instant
 ) : TicketEvent()
 
+data class Assigned(
+  override val entityKey: String,
+  val newUserId: UserId,
+) : TicketEvent()
+
 data class Blocked(
   override val entityKey: String
 ) : TicketEvent()
 
 data class Completed(
-  override val entityKey: String
+  override val entityKey: String,
+  val time: Instant
 ) : TicketEvent()
 
 data class Updated(
@@ -111,8 +117,8 @@ data class CommandStartWork(val id: String, val assignee: UserId) : TicketComman
 
 data class CommandEndWork(val id: String) : TicketCommand()
 
-//data class CommandPutOnHold(val id: String) : TicketCommand()
+data class CommandAssignToUser(val id: String, val assignee: UserId) : TicketCommand()
 //
-//data class CommandAssignToUser(val id: String, val assignee: UserId) : TicketCommand()
+//data class CommandPutOnHold(val id: String) : TicketCommand()
 //
 //data class CommandUpdateMetadata(val id: String, val title: String?, val description: String?) : TicketCommand()

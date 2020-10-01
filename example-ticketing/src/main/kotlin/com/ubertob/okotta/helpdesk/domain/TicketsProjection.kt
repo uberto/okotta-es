@@ -38,10 +38,13 @@ class TicketsProjection(eventFetcher: FetchStoredEvents<TicketEvent>) :
 
                 }
                 is Blocked -> TODO()
-                is Completed -> UpdateRow(e.rowId()) {r: TicketsProjectionRow ->
+                is Completed -> UpdateRow(e.rowId()) { r: TicketsProjectionRow ->
                     r.copy(kanbanColumn = TicketStatus.Done)
                 }
                 is Updated -> TODO()
+                is Assigned -> UpdateRow(e.rowId()) { r: TicketsProjectionRow ->
+                    r.copy(assignee = e.newUserId)
+                }
             }.toSingle()
     }
 }
