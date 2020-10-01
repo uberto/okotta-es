@@ -159,7 +159,19 @@ function KanbanCard(props) {
             </CardActions>
             <Collapse in={expanded} timeout="auto" unmountOnExit>
                 <CardContent>
+                   <Typography variant="overline">ID</Typography>
+                   <Typography paragraph>{card.id}</Typography>
+                   <Typography variant="overline">Description</Typography>
                    <Typography paragraph>{card.description}</Typography>
+                   { card.assignee && (
+                       <div>
+                           <Typography variant="overline">Assigned to</Typography>
+                           <Typography paragraph>
+                              <Avatar>{card.assignee.charAt(0)}</Avatar>
+                              {card.assignee}
+                           </Typography>
+                       </div>
+                   )}
                 </CardContent>
             </Collapse>
         </Card>
