@@ -76,15 +76,14 @@ const useStyles = makeStyles(theme => ({
 }));
 
 // util function for synchronising rest data
-function useFetch(url) {
+function useFetch(url, updateTrigger) {
   const [data, setData] = React.useState([]);
 
   React.useEffect(() => {
     fetch(url)
       .then(response => response.json())
       .then(data => setData(data));
-  }, []);
-
+  }, [updateTrigger]);
   return data;
 }
 
@@ -95,15 +94,16 @@ function postData(url, json) {
         body: JSON.stringify(json)
     };
     fetch(url, requestOptions)
-     .then(response => (response.status >= 400) ? alert("Failed: Response {response.status} {response.statusText}") : "");
+     .then(response => (response.status >= 400) ? alert(`Failed: Response ${response.status} ${response.statusText}`) : "");
 }
 
 function KanbanBoard(props) {
   const tickets = props.tickets;
+  const startTicket = props.startTicket;
   const classes = useStyles();
   return (
     <Grid container spacing={3} className={classes.root} direction="row" justify="center" alignItems="stretch">
-        <KanbanColumn name="Backlog" cardData={tickets.filter(it => it.kanban_column == "Backlog")} />
+        <KanbanColumn name="Backlog" startTicket={startTicket} cardData={tickets.filter(it => it.kanban_column == "Backlog")} />
         <KanbanColumn name="In Development" cardData={tickets.filter(it => it.kanban_column == "InDevelopment")} />
         <KanbanColumn name="Completed" cardData={tickets.filter(it => it.kanban_column == "Done")} />
     </Grid>
@@ -111,12 +111,14 @@ function KanbanBoard(props) {
 }
 
 function KanbanColumn(props) {
+    const name = props.name;
+    const startTicket = props.startTicket;
     return (
         <Grid item xs={4}>
             <Paper elevation={2}>
-                <Typography variant="h6" component="h6">{props.name}</Typography>
+                <Typography variant="h6" component="h6">{name}</Typography>
                 {props.cardData.map(card => (
-                   <KanbanCard card={card}/>
+                   <KanbanCard card={card} startTicket={startTicket} />
                 ))}
             </Paper>
         </Grid>
@@ -125,9 +127,15 @@ function KanbanColumn(props) {
 
 function KanbanCard(props) {
     const classes = useStyles();
+
     const [expanded, setExpanded] = React.useState(false);
     const handleExpandClick = () => { setExpanded(!expanded); };
     const expandMoreClassName = expanded ? classes.expandOpen : classes.expand;
+
+    const startTicket = props.startTicket;
+    const [startDialogOpen, setStartDialogOpen] = React.useState(false);
+    const toggleDialogOpen = () => { setStartDialogOpen(!startDialogOpen); }
+
     const card = props.card;
     return (
         <Card className={classes.kanbanCard}>
@@ -146,9 +154,12 @@ function KanbanCard(props) {
                 }
             />
             <CardActions disableSpacing>
-                <IconButton aria-label="move to next">
-                    <Icon>switch_right</Icon>
-                </IconButton>
+                {startTicket && (
+                    <div>
+                        <Button onClick={toggleDialogOpen}>Start</Button>
+                        <StartTicketDialog isOpen={startDialogOpen} id={card.id} startTicket={startTicket} onClose={toggleDialogOpen} />
+                    </div>
+                )}
                 <IconButton
                     onClick={handleExpandClick}
                     aria-expanded={expanded}
@@ -167,7 +178,7 @@ function KanbanCard(props) {
                        <div>
                            <Typography variant="overline">Assigned to</Typography>
                            <Typography paragraph>
-                              <Avatar>{card.assignee.charAt(0)}</Avatar>
+                              <Avatar>{card.assignee.charAt(0).toUpperCase()}</Avatar>
                               {card.assignee}
                            </Typography>
                        </div>
@@ -176,6 +187,46 @@ function KanbanCard(props) {
             </Collapse>
         </Card>
     );
+}
+
+function StartTicketDialog(props) {
+  const classes = useStyles();
+  const isOpen = props.isOpen;
+  const handleClose = props.onClose;
+  const handleStartTicket = props.startTicket;
+  const handleSave = (event) => {
+    event.preventDefault();
+    const form = event.target;
+    handleStartTicket(props.id, form.assignee.value);
+    return handleClose();
+  };
+  return (
+     <div>
+      <Dialog open={isOpen} onClose={handleClose} aria-labelledby="start-ticket-title">
+        <DialogTitle id="start-ticket-title">Start Ticket</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            To move the ticket to In Progress please assign the ticket to a user.
+          </DialogContentText>
+          <form id="new_ticket_form" onSubmit = {handleSave}>
+              <TextField
+                required
+                autoFocus
+                margin="dense"
+                id="assignee"
+                label="Assign To User"
+                type="text"
+                fullWidth
+              />
+          </form>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose} color="primary">Cancel</Button>
+          <Button color="primary" type="submit" form="new_ticket_form">Save</Button>
+        </DialogActions>
+      </Dialog>
+    </div>
+  );
 }
 
 function NewTicketDialog(props) {
@@ -209,7 +260,6 @@ function NewTicketDialog(props) {
               />
               <TextField
                 required
-                autoFocus
                 margin="dense"
                 id="description"
                 label="Description"
@@ -231,8 +281,7 @@ function TopNavBar(props) {
   const classes = useStyles();
 
   const [isOpen, setOpen] = React.useState(false);
-  const handleClickOpen = () => { setOpen(true); };
-  const handleClose = () => { setOpen(false); };
+  const toggleOpen = () => { setOpen(!isOpen); };
   const handleAddTicket = props.addTicket;
 
   return (
@@ -242,13 +291,13 @@ function TopNavBar(props) {
           <Typography variant="h6" className={classes.title}>
               Helpdesk Tickets
           </Typography>
-          <IconButton color="inherit" aria-label="new item" onClick={handleClickOpen}>
+          <IconButton color="inherit" aria-label="new item" onClick={toggleOpen}>
               <Icon>add</Icon>
           </IconButton>
         </Toolbar>
       </AppBar>
       <NewTicketDialog
-         handleClose={handleClose}
+         handleClose={toggleOpen}
          handleAddTicket={handleAddTicket}
          isOpen={isOpen}
       />
@@ -257,14 +306,21 @@ function TopNavBar(props) {
 }
 
 function App() {
-  const tickets = useFetch('http://localhost:8080/tickets');
+  const [lastUpdateCount, setLastUpdateCount] = React.useState(0);
   const addTicket = (title, description) => {
-      postData("http://localhost:8080/ticket", { "title": title, "description": description})
+      postData("http://localhost:8080/ticket", { "title": title, "description": description});
+      setLastUpdateCount(lastUpdateCount + 1);
   }
+  const startTicket = (id, assignee) => {
+      postData(`http://localhost:8080/ticket/${id}/start`, { "assignee": assignee});
+      setLastUpdateCount(lastUpdateCount + 1);
+  }
+  const tickets = useFetch('http://localhost:8080/tickets', lastUpdateCount);
+
   return (
     <Container maxWidth="lg">
       <TopNavBar addTicket={addTicket} />
-      <KanbanBoard tickets={tickets} />
+      <KanbanBoard tickets={tickets} startTicket={startTicket} />
     </Container>
   );
 }
