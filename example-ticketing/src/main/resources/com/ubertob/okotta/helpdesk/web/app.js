@@ -53,6 +53,13 @@ const useStyles = makeStyles(theme => ({
   title: {
     flexGrow: 1,
   },
+  kanbanBoard: {
+    margin: theme.spacing(6, 0, 3),
+    minHeight: '500px',
+  },
+  kanbanColumn: {
+    height: '100%',
+  },
   kanbanCard: {
     margin: theme.spacing(1),
   },
@@ -104,7 +111,7 @@ function KanbanBoard(props) {
   const completeTicket = props.completeTicket;
   const classes = useStyles();
   return (
-    <Grid container spacing={3} className={classes.root} direction="row" justify="center" alignItems="stretch">
+    <Grid container spacing={3} className={classes.kanbanBoard} direction="row" justify="center" alignItems="stretch">
         <KanbanColumn name="Backlog" startTicket={startTicket} cardData={tickets.filter(it => it.kanban_column == "Backlog")} />
         <KanbanColumn name="In Development" completeTicket={completeTicket} cardData={tickets.filter(it => it.kanban_column == "InDevelopment")} />
         <KanbanColumn name="Completed" cardData={tickets.filter(it => it.kanban_column == "Done")} />
@@ -113,12 +120,13 @@ function KanbanBoard(props) {
 }
 
 function KanbanColumn(props) {
+    const classes = useStyles();
     const name = props.name;
     const startTicket = props.startTicket;
     const completeTicket = props.completeTicket;
     return (
-        <Grid item xs={4}>
-            <Paper elevation={2}>
+        <Grid item xs={12} md={4}>
+            <Paper elevation={3} className={classes.kanbanColumn}>
                 <Typography variant="h6" component="h6">{name}</Typography>
                 {props.cardData.map(card => (
                    <KanbanCard key={card.id} card={card} startTicket={startTicket} completeTicket={completeTicket} />
@@ -165,10 +173,10 @@ function KanbanCard(props) {
             />
             <CardActions disableSpacing>
                 {startTicket && (
-                    <Button className={classes.cardActionButton} onClick={toggleDialogOpen}>Start</Button>
+                    <Button size="small" color="primary" className={classes.cardActionButton} onClick={toggleDialogOpen}>Start</Button>
                 )}
                 {completeTicket && (
-                    <Button className={classes.cardActionButton} onClick={handleDone}>Done</Button>
+                    <Button size="small" color="primary" className={classes.cardActionButton} onClick={handleDone}>Done</Button>
                 )}
             </CardActions>
             <Collapse in={expanded} timeout="auto" unmountOnExit>
