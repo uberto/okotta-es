@@ -108,12 +108,13 @@ function postData(url, json) {
 function KanbanBoard(props) {
   const tickets = props.tickets;
   const startTicket = props.startTicket;
+  const assignTicket = props.assignTicket;
   const completeTicket = props.completeTicket;
   const classes = useStyles();
   return (
     <Grid container spacing={3} className={classes.kanbanBoard} direction="row" justify="center" alignItems="stretch">
         <KanbanColumn name="Backlog" startTicket={startTicket} cardData={tickets.filter(it => it.kanban_column == "Backlog")} />
-        <KanbanColumn name="In Development" completeTicket={completeTicket} cardData={tickets.filter(it => it.kanban_column == "InDevelopment")} />
+        <KanbanColumn name="In Development" assignTicket={assignTicket} completeTicket={completeTicket} cardData={tickets.filter(it => it.kanban_column == "InDevelopment")} />
         <KanbanColumn name="Completed" cardData={tickets.filter(it => it.kanban_column == "Done")} />
     </Grid>
     );
@@ -123,13 +124,14 @@ function KanbanColumn(props) {
     const classes = useStyles();
     const name = props.name;
     const startTicket = props.startTicket;
+    const assignTicket = props.assignTicket;
     const completeTicket = props.completeTicket;
     return (
         <Grid item xs={12} md={4}>
             <Paper elevation={3} className={classes.kanbanColumn}>
                 <Typography variant="h6" component="h6">{name}</Typography>
                 {props.cardData.map(card => (
-                   <KanbanCard key={card.id} card={card} startTicket={startTicket} completeTicket={completeTicket} />
+                   <KanbanCard key={card.id} card={card} startTicket={startTicket} assignTicket={assignTicket} completeTicket={completeTicket} />
                 ))}
             </Paper>
         </Grid>
@@ -145,7 +147,11 @@ function KanbanCard(props) {
 
     const startTicket = props.startTicket;
     const [startDialogOpen, setStartDialogOpen] = React.useState(false);
-    const toggleDialogOpen = () => { setStartDialogOpen(!startDialogOpen); }
+    const toggleStartDialogOpen = () => { setStartDialogOpen(!startDialogOpen); }
+
+    const assignTicket = props.assignTicket;
+    const [assignDialogOpen, setAssignDialogOpen] = React.useState(false);
+    const toggleAssignDialogOpen = () => { setAssignDialogOpen(!assignDialogOpen); }
 
     const completeTicket = props.completeTicket;
     const handleDone = () => { completeTicket(card.id); }
@@ -173,7 +179,10 @@ function KanbanCard(props) {
             />
             <CardActions disableSpacing>
                 {startTicket && (
-                    <Button size="small" color="primary" className={classes.cardActionButton} onClick={toggleDialogOpen}>Start</Button>
+                    <Button size="small" color="primary" className={classes.cardActionButton} onClick={toggleStartDialogOpen}>Start</Button>
+                )}
+                {assignTicket && (
+                    <Button size="small" color="primary" className={classes.cardActionButton} onClick={toggleAssignDialogOpen}>Assign</Button>
                 )}
                 {completeTicket && (
                     <Button size="small" color="primary" className={classes.cardActionButton} onClick={handleDone}>Done</Button>
@@ -195,32 +204,35 @@ function KanbanCard(props) {
                 </CardContent>
             </Collapse>
             {startTicket && (
-                <StartTicketDialog isOpen={startDialogOpen} id={card.id} startTicket={startTicket} onClose={toggleDialogOpen} />
+                <AssignTicketDialog isOpen={startDialogOpen} id={card.id} assignTicket={startTicket} onClose={toggleStartDialogOpen} />
+            )}
+            {assignTicket && (
+                <AssignTicketDialog isOpen={assignDialogOpen} id={card.id} assignTicket={assignTicket} onClose={toggleAssignDialogOpen} />
             )}
         </Card>
     );
 }
 
-function StartTicketDialog(props) {
+function AssignTicketDialog(props) {
   const classes = useStyles();
   const isOpen = props.isOpen;
   const handleClose = props.onClose;
-  const handleStartTicket = props.startTicket;
+  const handleAssignTicket = props.assignTicket;
   const handleSave = (event) => {
     event.preventDefault();
     const form = event.target;
-    handleStartTicket(props.id, form.assignee.value);
+    handleAssignTicket(props.id, form.assignee.value);
     return handleClose();
   };
   return (
      <div>
-      <Dialog open={isOpen} onClose={handleClose} aria-labelledby="start-ticket-title">
-        <DialogTitle id="start-ticket-title">Start Ticket</DialogTitle>
+      <Dialog open={isOpen} onClose={handleClose} aria-labelledby="assign-ticket-title">
+        <DialogTitle id="assign-ticket-title">Assign Ticket</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            To move the ticket to In Progress please assign the ticket to a user.
+            Please assign the ticket to a user.
           </DialogContentText>
-          <form id="new_ticket_form" onSubmit = {handleSave}>
+          <form id="assign_ticket_form" onSubmit = {handleSave}>
               <TextField
                 required
                 autoFocus
@@ -234,7 +246,7 @@ function StartTicketDialog(props) {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose} color="primary">Cancel</Button>
-          <Button color="primary" type="submit" form="new_ticket_form">Save</Button>
+          <Button color="primary" type="submit" form="assign_ticket_form">Save</Button>
         </DialogActions>
       </Dialog>
     </div>
@@ -327,6 +339,10 @@ function App() {
       postData(`http://localhost:8080/ticket/${id}/start`, { "assignee": assignee});
       setLastUpdateCount(lastUpdateCount + 1);
   }
+  const assignTicket = (id, assignee) => {
+      postData(`http://localhost:8080/ticket/${id}/assign`, { "assignee": assignee});
+      setLastUpdateCount(lastUpdateCount + 1);
+  }
   const completeTicket = (id) => {
       postData(`http://localhost:8080/ticket/${id}/complete`, {});
       setLastUpdateCount(lastUpdateCount + 1);
@@ -336,7 +352,7 @@ function App() {
   return (
     <Container maxWidth="lg">
       <TopNavBar addTicket={addTicket} />
-      <KanbanBoard tickets={tickets} startTicket={startTicket} completeTicket={completeTicket} />
+      <KanbanBoard tickets={tickets} startTicket={startTicket} assignTicket={assignTicket} completeTicket={completeTicket} />
     </Container>
   );
 }
