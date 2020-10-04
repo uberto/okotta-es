@@ -58,17 +58,18 @@ const useStyles = makeStyles(theme => ({
   },
   expand: {
     transform: 'rotate(0deg)',
-    marginLeft: 'auto',
     transition: theme.transitions.create('transform', {
       duration: theme.transitions.duration.shortest,
     }),
   },
   expandOpen: {
-    marginLeft: 'auto',
     transform: 'rotate(180deg)',
     transition: theme.transitions.create('transform', {
       duration: theme.transitions.duration.shortest,
     }),
+  },
+  cardActionButton: {
+    marginLeft: 'auto',
   },
   avatar: {
     backgroundColor: colors.red[500],
@@ -100,11 +101,12 @@ function postData(url, json) {
 function KanbanBoard(props) {
   const tickets = props.tickets;
   const startTicket = props.startTicket;
+  const completeTicket = props.completeTicket;
   const classes = useStyles();
   return (
     <Grid container spacing={3} className={classes.root} direction="row" justify="center" alignItems="stretch">
         <KanbanColumn name="Backlog" startTicket={startTicket} cardData={tickets.filter(it => it.kanban_column == "Backlog")} />
-        <KanbanColumn name="In Development" cardData={tickets.filter(it => it.kanban_column == "InDevelopment")} />
+        <KanbanColumn name="In Development" completeTicket={completeTicket} cardData={tickets.filter(it => it.kanban_column == "InDevelopment")} />
         <KanbanColumn name="Completed" cardData={tickets.filter(it => it.kanban_column == "Done")} />
     </Grid>
     );
@@ -113,12 +115,13 @@ function KanbanBoard(props) {
 function KanbanColumn(props) {
     const name = props.name;
     const startTicket = props.startTicket;
+    const completeTicket = props.completeTicket;
     return (
         <Grid item xs={4}>
             <Paper elevation={2}>
                 <Typography variant="h6" component="h6">{name}</Typography>
                 {props.cardData.map(card => (
-                   <KanbanCard card={card} startTicket={startTicket} />
+                   <KanbanCard key={card.id} card={card} startTicket={startTicket} completeTicket={completeTicket} />
                 ))}
             </Paper>
         </Grid>
@@ -136,6 +139,9 @@ function KanbanCard(props) {
     const [startDialogOpen, setStartDialogOpen] = React.useState(false);
     const toggleDialogOpen = () => { setStartDialogOpen(!startDialogOpen); }
 
+    const completeTicket = props.completeTicket;
+    const handleDone = () => { completeTicket(card.id); }
+
     const card = props.card;
     return (
         <Card className={classes.kanbanCard}>
@@ -148,25 +154,22 @@ function KanbanCard(props) {
                   </Avatar>
                 }
                 action={
-                  <IconButton aria-label="settings">
-                    <Icon>more_vert</Icon>
-                  </IconButton>
+                    <IconButton
+                        onClick={handleExpandClick}
+                        aria-expanded={expanded}
+                        className={expandMoreClassName}
+                        aria-label="show more">
+                        <Icon>expand_more</Icon>
+                    </IconButton>
                 }
             />
             <CardActions disableSpacing>
                 {startTicket && (
-                    <div>
-                        <Button onClick={toggleDialogOpen}>Start</Button>
-                        <StartTicketDialog isOpen={startDialogOpen} id={card.id} startTicket={startTicket} onClose={toggleDialogOpen} />
-                    </div>
+                    <Button className={classes.cardActionButton} onClick={toggleDialogOpen}>Start</Button>
                 )}
-                <IconButton
-                    onClick={handleExpandClick}
-                    aria-expanded={expanded}
-                    className={expandMoreClassName}
-                    aria-label="show more">
-                    <Icon>expand_more</Icon>
-                </IconButton>
+                {completeTicket && (
+                    <Button className={classes.cardActionButton} onClick={handleDone}>Done</Button>
+                )}
             </CardActions>
             <Collapse in={expanded} timeout="auto" unmountOnExit>
                 <CardContent>
@@ -177,14 +180,15 @@ function KanbanCard(props) {
                    { card.assignee && (
                        <div>
                            <Typography variant="overline">Assigned to</Typography>
-                           <Typography paragraph>
-                              <Avatar>{card.assignee.charAt(0).toUpperCase()}</Avatar>
-                              {card.assignee}
-                           </Typography>
+                          <Avatar>{card.assignee.charAt(0).toUpperCase()}</Avatar>
+                           <Typography paragraph>{card.assignee}</Typography>
                        </div>
                    )}
                 </CardContent>
             </Collapse>
+            {startTicket && (
+                <StartTicketDialog isOpen={startDialogOpen} id={card.id} startTicket={startTicket} onClose={toggleDialogOpen} />
+            )}
         </Card>
     );
 }
@@ -315,12 +319,16 @@ function App() {
       postData(`http://localhost:8080/ticket/${id}/start`, { "assignee": assignee});
       setLastUpdateCount(lastUpdateCount + 1);
   }
+  const completeTicket = (id) => {
+      postData(`http://localhost:8080/ticket/${id}/complete`, {});
+      setLastUpdateCount(lastUpdateCount + 1);
+  }
   const tickets = useFetch('http://localhost:8080/tickets', lastUpdateCount);
 
   return (
     <Container maxWidth="lg">
       <TopNavBar addTicket={addTicket} />
-      <KanbanBoard tickets={tickets} startTicket={startTicket} />
+      <KanbanBoard tickets={tickets} startTicket={startTicket} completeTicket={completeTicket} />
     </Container>
   );
 }
