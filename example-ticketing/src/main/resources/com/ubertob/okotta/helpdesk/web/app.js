@@ -90,7 +90,7 @@ function useFetch(url, updateTrigger) {
   React.useEffect(() => {
     fetch(url)
       .then(response => response.json())
-      .then(data => setData(data));
+      .then(newData => setData(newData));
   }, [updateTrigger]);
   return data;
 }
