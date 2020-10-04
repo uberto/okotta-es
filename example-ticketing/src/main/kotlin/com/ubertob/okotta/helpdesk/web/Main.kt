@@ -10,6 +10,7 @@ fun main() {
     val helpDesk = helpDeskBuilder()
 
     helpDesk.asServer(Jetty(8080)).start()
+    println("Helpdesk UI: http://localhost:8080/ui/")
 }
 
 fun helpDeskBuilder(): HelpDesk {
