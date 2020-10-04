@@ -79,17 +79,17 @@ data class InBacklog(
 data class InProgress(
   val entityKey: String
 ) : TicketState() {
-  override fun combine(event: TicketEvent): TicketState {
-    TODO("not implemented")
+  override fun combine(event: TicketEvent): TicketState = when(event) {
+    is Assigned -> InProgress(event.entityKey)
+    else -> InvalidState(event.entityKey, this, event)
   }
 }
 
 data class Done(
   val entityKey: String
 ) : TicketState() {
-  override fun combine(event: TicketEvent): TicketState {
-    TODO("not implemented")
-  }
+  override fun combine(event: TicketEvent): TicketState =
+    InvalidState(event.entityKey, this, event) //there are no events allowed in Done state
 }
 
 data class OnHold(

@@ -72,24 +72,40 @@ internal class TicketCommandHandlerTest {
     }
 
     @Test
-    fun `assign a ticket to another person`() {
+    fun `assign a ticket to another person multiple times`() {
         val frank = UserId("Frank")
         val alice = UserId("Alice")
+        val bob = UserId("bob")
 
         val id = ch(CommandAddToBacklog("my title", "doing some stuff")).single().entityKey
         ch(CommandStartWork(id, frank)).single()
-        val event = ch(CommandAssignToUser(id, alice)).single()
 
-        expectThat(event).isA<Assigned>()
+        ch(CommandAssignToUser(id, alice)).single().let { event ->
+            expectThat(event).isA<Assigned>()
 
-        expectThat(p.getTicket(id))
-            .isEqualTo(
-                TicketsProjectionRow(
-                    title = "my title",
-                    description = "doing some stuff",
-                    kanbanColumn = TicketStatus.InDevelopment,
-                    assignee = alice
+            expectThat(p.getTicket(id))
+                .isEqualTo(
+                    TicketsProjectionRow(
+                        title = "my title",
+                        description = "doing some stuff",
+                        kanbanColumn = TicketStatus.InDevelopment,
+                        assignee = alice
+                    )
                 )
-            )
+        }
+
+        ch(CommandAssignToUser(id, bob)).single().let { event ->
+            expectThat(event).isA<Assigned>()
+
+            expectThat(p.getTicket(id))
+                .isEqualTo(
+                    TicketsProjectionRow(
+                        title = "my title",
+                        description = "doing some stuff",
+                        kanbanColumn = TicketStatus.InDevelopment,
+                        assignee = bob
+                    )
+                )
+        }
     }
 }
