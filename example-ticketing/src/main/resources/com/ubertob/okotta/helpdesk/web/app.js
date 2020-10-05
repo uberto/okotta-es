@@ -95,22 +95,26 @@ function useFetch(url, updateTrigger) {
   return data;
 }
 
-function postData(url, json) {
+function sendHttpPost(url, json, onCompletion) {
     const requestOptions = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(json)
     };
     fetch(url, requestOptions)
-     .then(response => (response.status >= 400) ? alert(`Failed: Response ${response.status} ${response.statusText}`) : "");
+     .then(response => (response.status >= 400) ? alert(`Failed: Response ${response.status} ${response.statusText}`) : "")
+     .then(onCompletion());
 }
 
 function KanbanBoard(props) {
-  const tickets = props.tickets;
-  const startTicket = props.startTicket;
-  const assignTicket = props.assignTicket;
-  const completeTicket = props.completeTicket;
   const classes = useStyles();
+  const tickets = props.tickets;
+  const postData = props.postData;
+
+  const startTicket = (id, assignee) => { postData(`/ticket/${id}/start`, { "assignee": assignee}); }
+  const assignTicket = (id, assignee) => { postData(`/ticket/${id}/assign`, { "assignee": assignee}); }
+  const completeTicket = (id) => { postData(`/ticket/${id}/complete`, {}); }
+
   return (
     <Grid container spacing={3} className={classes.kanbanBoard} direction="row" justify="center" alignItems="stretch">
         <KanbanColumn name="Backlog" startTicket={startTicket} cardData={tickets.filter(it => it.kanban_column == "Backlog")} />
@@ -222,7 +226,7 @@ function AssignTicketDialog(props) {
     event.preventDefault();
     const form = event.target;
     handleAssignTicket(props.id, form.assignee.value);
-    return handleClose();
+    handleClose();
   };
   return (
      <div>
@@ -257,13 +261,15 @@ function NewTicketDialog(props) {
   const classes = useStyles();
   const isOpen = props.isOpen;
   const handleClose = props.handleClose;
-  const handleAddTicket = props.handleAddTicket;
+  const postData = props.postData;
+
   const handleSave = (event) => {
     event.preventDefault();
     const form = event.target;
-    handleAddTicket(form.title.value, form.description.value);
-    return handleClose();
+    postData("/ticket", { "title": form.title.value, "description": form.description.value});
+    handleClose();
   };
+
   return (
      <div>
       <Dialog open={isOpen} onClose={handleClose} aria-labelledby="new-ticket-title">
@@ -303,11 +309,9 @@ function NewTicketDialog(props) {
 
 function TopNavBar(props) {
   const classes = useStyles();
-
+  const postData = props.postData;
   const [isOpen, setOpen] = React.useState(false);
   const toggleOpen = () => { setOpen(!isOpen); };
-  const handleAddTicket = props.addTicket;
-
   return (
     <div>
       <AppBar position="static">
@@ -320,39 +324,23 @@ function TopNavBar(props) {
           </IconButton>
         </Toolbar>
       </AppBar>
-      <NewTicketDialog
-         handleClose={toggleOpen}
-         handleAddTicket={handleAddTicket}
-         isOpen={isOpen}
-      />
+
+      <NewTicketDialog handleClose={toggleOpen} postData={postData} isOpen={isOpen} />
     </div>
   );
 }
 
 function App() {
   const [lastUpdateCount, setLastUpdateCount] = React.useState(0);
-  const addTicket = (title, description) => {
-      postData("http://localhost:8080/ticket", { "title": title, "description": description});
-      setLastUpdateCount(lastUpdateCount + 1);
-  }
-  const startTicket = (id, assignee) => {
-      postData(`http://localhost:8080/ticket/${id}/start`, { "assignee": assignee});
-      setLastUpdateCount(lastUpdateCount + 1);
-  }
-  const assignTicket = (id, assignee) => {
-      postData(`http://localhost:8080/ticket/${id}/assign`, { "assignee": assignee});
-      setLastUpdateCount(lastUpdateCount + 1);
-  }
-  const completeTicket = (id) => {
-      postData(`http://localhost:8080/ticket/${id}/complete`, {});
-      setLastUpdateCount(lastUpdateCount + 1);
-  }
+  const incrementLastUpdateCount = () => { setLastUpdateCount(lastUpdateCount + 1) }
   const tickets = useFetch('http://localhost:8080/tickets', lastUpdateCount);
-
+  const postData = (uriPath, json) => {
+    sendHttpPost('http://localhost:8080' + uriPath, json, incrementLastUpdateCount);
+  }
   return (
     <Container maxWidth="lg">
-      <TopNavBar addTicket={addTicket} />
-      <KanbanBoard tickets={tickets} startTicket={startTicket} assignTicket={assignTicket} completeTicket={completeTicket} />
+      <TopNavBar postData={postData} />
+      <KanbanBoard postData={postData} tickets={tickets} />
     </Container>
   );
 }
