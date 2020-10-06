@@ -102,8 +102,13 @@ function sendHttpPost(url, json, onCompletion) {
         body: JSON.stringify(json)
     };
     fetch(url, requestOptions)
-     .then(response => (response.status >= 400) ? alert(`Failed: Response ${response.status} ${response.statusText}`) : "")
-     .then(onCompletion());
+     .then(response => {
+          if (response.status >= 400) {
+             alert(`Failed: Response ${response.status} ${response.statusText}`)
+          } else {
+             onCompletion()
+          }
+      })
 }
 
 function KanbanBoard(props) {
