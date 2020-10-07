@@ -119,6 +119,8 @@ data class CommandEndWork(val id: String) : TicketCommand()
 
 data class CommandAssignToUser(val id: String, val assignee: UserId) : TicketCommand()
 //
+//data class CommandUpdateMetadata(val id: String, val title: String?, val description: String?) : TicketCommand()
+//
 //data class CommandPutOnHold(val id: String) : TicketCommand()
 //
-//data class CommandUpdateMetadata(val id: String, val title: String?, val description: String?) : TicketCommand()
+//data class CommandReactivate(val id: String) : TicketCommand()

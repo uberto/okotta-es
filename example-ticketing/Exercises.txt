@@ -1,0 +1,9 @@
+Exercise 1: Complete the SafeEvent.kt code in a way that will make the tests pass
+
+Exercise 2: Fix the HelpDesk in a way that will make the test on double assignment pass
+
+Exercise 3: Create a query for the HelpDesk Projection to count tickets for a given state and connect to http endpoint (optional connect to UI)
+
+Exercise 4: Create a HelpDesk Command for UpdateMetadata and connect to http endpoint (optional connect to UI)
+
+Exercise 5: Model the flow of articles for an academic journal publisher

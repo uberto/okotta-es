@@ -3,6 +3,7 @@ package com.ubertob.okotta.helpdesk.domain
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.isA
+import strikt.assertions.isEmpty
 import strikt.assertions.isEqualTo
 
 internal class TicketCommandHandlerTest {
@@ -75,7 +76,7 @@ internal class TicketCommandHandlerTest {
     fun `assign a ticket to another person multiple times`() {
         val frank = UserId("Frank")
         val alice = UserId("Alice")
-        val bob = UserId("bob")
+        val bob = UserId("Bob")
 
         val id = ch(CommandAddToBacklog("my title", "doing some stuff")).single().entityKey
         ch(CommandStartWork(id, frank)).single()
@@ -107,5 +108,17 @@ internal class TicketCommandHandlerTest {
                     )
                 )
         }
+    }
+
+
+    @Test
+    fun `trying to assing a ticket to the same person doesn't generate events`() {
+        val frank = UserId("Frank")
+
+        val id = ch(CommandAddToBacklog("my title", "doing some stuff")).single().entityKey
+        ch(CommandStartWork(id, frank))
+        val events = ch(CommandAssignToUser(id, frank))
+
+        expectThat(events).isEmpty()
     }
 }
