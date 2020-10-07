@@ -28,34 +28,20 @@ object InitialState : SafeState() {
 data class Open internal constructor(
         val id: SafeId
 ) : SafeState() {
-    override fun combine(event: SafeEvent): SafeState =
-            when (event) {
-                is Closed -> AlarmInactive(id)
-                else -> InvalidState(id,this, event)
-            }
+    override fun combine(event: SafeEvent): SafeState = TODO()
 }
 
 data class AlarmInactive internal constructor(
         val id: SafeId
 ) : SafeState() {
-    override fun combine(event: SafeEvent): SafeState =
-            when (event) {
-                is Opened -> Open(id)
-                is Locked -> AlarmActive(id, event.code)
-                else -> InvalidState(id,this, event)
-            }
-
+    override fun combine(event: SafeEvent): SafeState = TODO()
 }
 
 data class AlarmActive internal constructor(
         val id: SafeId,
         val code: String
 ) : SafeState() {
-    override fun combine(event: SafeEvent): SafeState =
-            when (event) {
-                is Unlocked -> AlarmInactive(id)
-                else -> InvalidState(id,this, event)
-            }
+    override fun combine(event: SafeEvent): SafeState = TODO()
 }
 
 data class InvalidState(val id: SafeId, val prevState: SafeState, val event: SafeEvent): SafeState() {
