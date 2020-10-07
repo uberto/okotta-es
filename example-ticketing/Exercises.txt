@@ -4,9 +4,17 @@ codegen/examples/safe.dot
 
 to build and run the tests:
 cd core
-./gradlew build
+../gradlew build
 
 Exercise 2: Fix the HelpDesk in a way that will make the test on double assignment pass
+
+to build and run the tests:
+cd example-ticketing
+../gradlew build
+
+to run the application:
+cd example-ticketing
+../gradlew run
 
 Exercise 3: Create a query for the HelpDesk Projection to count tickets for a given state and connect to http endpoint (optional connect to UI)
 
