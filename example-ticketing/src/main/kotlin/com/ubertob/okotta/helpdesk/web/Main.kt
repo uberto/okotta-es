@@ -10,7 +10,11 @@ fun main() {
     val helpDesk = helpDeskBuilder()
 
     helpDesk.asServer(Jetty(8080)).start()
+    println()
+    println("--------------------------------------------------------------------")
     println("Helpdesk UI: http://localhost:8080/ui/")
+    println("Helpdesk EventStore (For Debug): http://localhost:8080/debug-events")
+    println("--------------------------------------------------------------------")
 }
 
 fun helpDeskBuilder(): HelpDesk {
