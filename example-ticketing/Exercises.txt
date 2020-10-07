@@ -1,4 +1,10 @@
-Exercise 1: Complete the SafeEvent.kt code in a way that will make the tests pass
+Exercise 1: Complete the SafeEvent.kt code in a way that will make the all the tests pass
+see diagram in:
+codegen/examples/safe.dot
+
+to build and run the tests:
+cd core
+./gradlew build
 
 Exercise 2: Fix the HelpDesk in a way that will make the test on double assignment pass
 
@@ -7,3 +13,11 @@ Exercise 3: Create a query for the HelpDesk Projection to count tickets for a gi
 Exercise 4: Create a HelpDesk Command for UpdateMetadata and connect to http endpoint (optional connect to UI)
 
 Exercise 5: Model the flow of articles for an academic journal publisher
+- the system receive all the data for an accepted article from Production system
+- the system has to contact the author by email
+- the author has to answer some questions to generate a licence
+- the author has to accept the licence
+- if article is OpenAccess the system has to calculate the price
+- if OA the author has to pay the price by credit card or invoice
+- the system send the licence to the legal store
+- the system send the relevant information to the Production system
