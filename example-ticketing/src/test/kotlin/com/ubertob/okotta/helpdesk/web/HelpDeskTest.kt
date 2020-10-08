@@ -79,6 +79,33 @@ internal class HelpDeskTest {
     }
 
     @Test
+    fun `put ticket onhold from backlog`() {
+        // setup: create a ticket and start work on it
+        val id = handler.commandHandler(CommandAddToBacklog("title1", "description1")).first().entityKey
+
+        with(
+            handler(
+                Request(Method.POST, "/ticket/$id/onhold")
+            )
+        ) {
+            expectThat(status).isEqualTo(NO_CONTENT)
+        }
+
+
+        with(handler(Request(GET, "/ticket/$id"))) {
+            expectThat(status).isEqualTo(OK)
+            expectThat(bodyString().asJsonObject()).isEquivalentTo(
+                """{
+                    "id": "$id",
+                    "title" : "title1",
+                    "description": "description1",
+                    "kanban_column" : "Blocked"
+                }"""
+            )
+        }
+    }
+
+    @Test
     fun `start progress on ticket`() {
         // setup: create a ticket
         val id = handler.commandHandler(CommandAddToBacklog("title1", "description1")).first().entityKey
@@ -141,6 +168,35 @@ internal class HelpDeskTest {
         }
     }
 
+
+    @Test
+    fun `put ticket onhold from inprogress`() {
+        // setup: create a ticket and start work on it
+        val id = handler.commandHandler(CommandAddToBacklog("title1", "description1")).first().entityKey
+        handler.commandHandler(CommandStartWork(id, UserId("user1")))
+
+        with(
+            handler(
+                Request(Method.POST, "/ticket/$id/onhold")
+            )
+        ) {
+            expectThat(status).isEqualTo(NO_CONTENT)
+        }
+
+
+        with(handler(Request(GET, "/ticket/$id"))) {
+            expectThat(status).isEqualTo(OK)
+            expectThat(bodyString().asJsonObject()).isEquivalentTo(
+                """{
+                    "id": "$id",
+                    "title" : "title1",
+                    "description": "description1",
+                    "kanban_column" : "Blocked",
+                    "assignee" : "user1"
+                }"""
+            )
+        }
+    }
 
     @Test
     fun `complete a ticket`() {

@@ -52,6 +52,14 @@ class TicketCommandHandler(
                 is OnHold,
                 is InvalidState -> throw RuntimeException("Invalid state! $ticket")
             }
+            is CommandPutOnHold -> when (val ticket = getTicket(command.id)) {
+                is InBacklog  -> Blocked(ticket.entityKey).toSingleList()
+                is InProgress -> Blocked(ticket.entityKey).toSingleList()
+                InitialState,
+                is Done,
+                is OnHold,
+                is InvalidState -> throw RuntimeException("Invalid state! $ticket")
+            }
         }
 
 }

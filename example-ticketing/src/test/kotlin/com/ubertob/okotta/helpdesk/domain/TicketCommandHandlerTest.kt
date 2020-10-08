@@ -110,6 +110,13 @@ internal class TicketCommandHandlerTest {
         }
     }
 
+    @Test
+    fun `put a ticket in the backlog on hold`() {
+        val id = ch(CommandAddToBacklog("my title", "doing some stuff")).single().entityKey
+        val event = ch(CommandPutOnHold(id)).single()
+
+        expectThat(event).isEqualTo(Blocked(id))
+    }
 
     @Test
     fun `trying to assing a ticket to the same person doesn't generate events`() {
