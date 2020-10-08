@@ -72,6 +72,7 @@ data class InBacklog(
 ) : TicketState() {
   override fun combine(event: TicketEvent): TicketState = when(event) {
     is Started -> InProgress(event.entityKey)
+    is Blocked -> OnHold(event.entityKey)
     else -> InvalidState(event.entityKey, this, event)
   }
 }
@@ -81,6 +82,7 @@ data class InProgress(
 ) : TicketState() {
   override fun combine(event: TicketEvent): TicketState = when(event) {
     is Assigned -> InProgress(event.entityKey)
+    is Blocked -> OnHold(event.entityKey)
     else -> InvalidState(event.entityKey, this, event)
   }
 }
@@ -95,9 +97,8 @@ data class Done(
 data class OnHold(
   val entityKey: String
 ) : TicketState() {
-  override fun combine(event: TicketEvent): TicketState {
-    TODO("not implemented")
-  }
+  override fun combine(event: TicketEvent): TicketState =
+    InvalidState(event.entityKey, this, event) //there are no events allowed in OnHold state
 }
 
 // =========================================================================================
@@ -121,6 +122,6 @@ data class CommandAssignToUser(val id: String, val assignee: UserId) : TicketCom
 //
 //data class CommandUpdateMetadata(val id: String, val title: String?, val description: String?) : TicketCommand()
 //
-//data class CommandPutOnHold(val id: String) : TicketCommand()
+data class CommandPutOnHold(val id: String) : TicketCommand()
 //
 //data class CommandReactivate(val id: String) : TicketCommand()
