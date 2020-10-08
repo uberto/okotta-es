@@ -45,7 +45,11 @@ class TicketCommandHandler(
             }
 
             is CommandAssignToUser -> when (val ticket = getTicket(command.id)) {
-                is InProgress -> Assigned(ticket.entityKey, command.assignee).toSingleList()
+                is InProgress -> if (ticket.assignee != command.assignee) {
+                    Assigned(ticket.entityKey, command.assignee).toSingleList()
+                } else {
+                    emptyList()
+                }
                 InitialState,
                 is InBacklog,
                 is Done,
@@ -53,7 +57,7 @@ class TicketCommandHandler(
                 is InvalidState -> throw RuntimeException("Invalid state! $ticket")
             }
             is CommandPutOnHold -> when (val ticket = getTicket(command.id)) {
-                is InBacklog  -> Blocked(ticket.entityKey).toSingleList()
+                is InBacklog -> Blocked(ticket.entityKey).toSingleList()
                 is InProgress -> Blocked(ticket.entityKey).toSingleList()
                 InitialState,
                 is Done,

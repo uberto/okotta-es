@@ -71,17 +71,18 @@ data class InBacklog(
   val entityKey: String
 ) : TicketState() {
   override fun combine(event: TicketEvent): TicketState = when(event) {
-    is Started -> InProgress(event.entityKey)
+    is Started -> InProgress(event.entityKey, event.userId)
     is Blocked -> OnHold(event.entityKey)
     else -> InvalidState(event.entityKey, this, event)
   }
 }
 
 data class InProgress(
-  val entityKey: String
+  val entityKey: String,
+  val assignee: UserId
 ) : TicketState() {
   override fun combine(event: TicketEvent): TicketState = when(event) {
-    is Assigned -> InProgress(event.entityKey)
+    is Assigned -> InProgress(event.entityKey, event.newUserId)
     is Blocked -> OnHold(event.entityKey)
     else -> InvalidState(event.entityKey, this, event)
   }
