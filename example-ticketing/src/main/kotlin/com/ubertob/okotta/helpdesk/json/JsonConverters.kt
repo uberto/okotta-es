@@ -70,6 +70,8 @@ object JGetTicketResponse : JAny<GetTicketResponse>() {
 
 val JAllTicketsResponse = JList(JGetTicketResponse)
 
+val JCountTicketsResponse = JMap(JEnum(TicketStatus::valueOf), JInt)
+
 val JDebugEventsResponse = JList(JDebugEvent)
 
 object JDebugEvent : JAny<DebugEvent>() {

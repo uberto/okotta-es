@@ -25,6 +25,7 @@ class HelpDesk(val ticketsProjection: TicketsProjection, val commandHandler: Tic
         "/debug-events" bind Method.GET to ::debugEvents,
         "/ticket" bind Method.POST to ::addTicket,
         "/tickets" bind Method.GET to ::allTickets,
+        "/tickets/count" bind Method.GET to ::countTickets,
         "/ticket/{ticketId}" bind Method.GET to ::getTicket,
         "/ticket/{ticketId}/assign" bind Method.POST to ::assignTicket,
         "/ticket/{ticketId}/start" bind Method.POST to ::startTicket,
@@ -94,6 +95,11 @@ class HelpDesk(val ticketsProjection: TicketsProjection, val commandHandler: Tic
             )
         }
         return Response(OK).serialize(JAllTicketsResponse, all)
+    }
+
+    private fun countTickets(@Suppress("UNUSED_PARAMETER") request: Request): Response {
+        val counts = ticketsProjection.getCounts()
+        return Response(OK).serialize(JCountTicketsResponse, counts)
     }
 
     private fun startTicket(request: Request): Response {

@@ -25,6 +25,19 @@ class TicketsProjection(eventFetcher: FetchStoredEvents<TicketEvent>) :
     fun getTickets(): Map<RowId, TicketsProjectionRow> =
         allRows()
 
+    fun getCounts(): Map<TicketStatus, Int> =
+        allRows().values
+            .groupBy { it.kanbanColumn }
+            .mapValues { mapEntry ->
+                val rows: List<TicketsProjectionRow> = mapEntry.value
+                rows.count()
+            }
+
+    // a more streamlined kotlin implementation would be:
+    //    fun getCounts(): Map<TicketStatus, Int> =
+    //        allRows().values
+    //            .groupBy { it.kanbanColumn }
+    //            .mapValues { (_, rows) -> rows.count() }
 
     companion object {
         fun eventProjector(e: TicketEvent): List<DeltaRow<TicketsProjectionRow>> =

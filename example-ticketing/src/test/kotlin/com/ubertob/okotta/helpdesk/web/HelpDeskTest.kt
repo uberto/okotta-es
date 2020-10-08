@@ -229,6 +229,25 @@ internal class HelpDeskTest {
             )
         }
     }
+
+    @Test
+    fun `get status counts`() {
+        // setup: create some tickets in different states
+        handler.commandHandler(CommandAddToBacklog("title1", "description1"))
+        handler.commandHandler(CommandAddToBacklog("title2", "description2"))
+        val id = handler.commandHandler(CommandAddToBacklog("title3", "description2")).first().entityKey
+        handler.commandHandler(CommandStartWork(id, UserId("user1")))
+
+        with(handler(Request(GET, "/tickets/count"))) {
+            expectThat(status).isEqualTo(OK)
+            expectThat(parseJsonNode(bodyString()).orThrow()).isEquivalentTo(
+                """{
+                    "Backlog": 2,
+                    "InDevelopment": 1
+                    }"""
+            )
+        }
+    }
 }
 
 private fun Assertion.Builder<JsonNode>.isEquivalentTo(jsonString: String): Assertion.Builder<JsonNode> =
