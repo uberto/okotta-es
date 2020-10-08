@@ -56,7 +56,9 @@ class TicketsProjection(eventFetcher: FetchStoredEvents<TicketEvent>) :
                 is Completed -> UpdateRow(e.rowId()) { r: TicketsProjectionRow ->
                     r.copy(kanbanColumn = TicketStatus.Done)
                 }
-                is Updated -> TODO()
+                is Updated -> UpdateRow(e.rowId()) { r: TicketsProjectionRow ->
+                    r.copy(description = e.newDescription)
+                }
                 is Assigned -> UpdateRow(e.rowId()) { r: TicketsProjectionRow ->
                     r.copy(assignee = e.newUserId)
                 }

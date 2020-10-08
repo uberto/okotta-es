@@ -168,6 +168,37 @@ internal class HelpDeskTest {
         }
     }
 
+    @Test
+    fun `update ticket description`() {
+        // setup: create a ticket and start work on it
+        val id = handler.commandHandler(CommandAddToBacklog("title1", "description1")).first().entityKey
+        handler.commandHandler(CommandStartWork(id, UserId("user1")))
+
+        with(
+            handler(
+                Request(POST, "/ticket/$id/update").body(
+                    """{
+                        "description" : "description2"
+                    }"""
+                )
+            )
+        ) {
+            expectThat(status).isEqualTo(NO_CONTENT)
+        }
+
+        with(handler(Request(GET, "/ticket/$id"))) {
+            expectThat(status).isEqualTo(OK)
+            expectThat(bodyString().asJsonObject()).isEquivalentTo(
+                """{
+                    "id": "$id",
+                    "title" : "title1",
+                    "description": "description2",
+                    "kanban_column" : "InDevelopment",
+                    "assignee": "user1"
+                }"""
+            )
+        }
+    }
 
     @Test
     fun `put ticket onhold from inprogress`() {
