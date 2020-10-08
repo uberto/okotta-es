@@ -20,6 +20,7 @@ class HelpDesk(val ticketsProjection: TicketsProjection, val commandHandler: Tic
         "/debug-events" bind Method.GET to ::debugEvents,
         "/ticket" bind Method.POST to ::addTicket,
         "/tickets" bind Method.GET to ::allTickets,
+        "/tickets/count" bind Method.GET to ::countTickets,
         "/ticket/{ticketId}" bind Method.GET to ::getTicket,
         "/ticket/{ticketId}/assign" bind Method.POST to ::assignTicket,
         "/ticket/{ticketId}/start" bind Method.POST to ::startTicket,
@@ -89,6 +90,11 @@ class HelpDesk(val ticketsProjection: TicketsProjection, val commandHandler: Tic
         return Response(OK).contentTypeJson().body(AllTicketsResponse(all).serialise())
     }
 
+    private fun countTickets(@Suppress("UNUSED_PARAMETER") request: Request): Response {
+        val counts = ticketsProjection.getCounts()
+        return Response(OK).contentTypeJson().body(CountTicketsResponse(counts).serialise())
+    }
+
     private fun startTicket(request: Request): Response {
         val ticketId = request.path("ticketId") ?: return Response(Status.BAD_REQUEST)
         val startTicket: StartTicketRequest = request.bodyString().deserialise() ?: return Response(Status.BAD_REQUEST)
@@ -125,6 +131,7 @@ data class GetTicketResponse(
 ) : JsonSerialisable
 
 class AllTicketsResponse(array: List<GetTicketResponse>) : ArrayList<GetTicketResponse>(array), JsonSerialisable
+class CountTicketsResponse(map: Map<TicketStatus,Int>) : HashMap<TicketStatus,Int>(map), JsonSerialisable
 
 class DebugEventsResponse(array: List<DebugEvent>): ArrayList<DebugEvent>(array), JsonSerialisable
 data class DebugEvent(val eventId: Int, val eventName: String, val event: TicketEvent)
