@@ -38,7 +38,8 @@ data class Completed(
 ) : TicketEvent()
 
 data class Updated(
-  override val entityKey: String
+  override val entityKey: String,
+  val newDescription: String
 ) : TicketEvent()
 
 // =========================================================================================
@@ -84,6 +85,7 @@ data class InProgress(
   override fun combine(event: TicketEvent): TicketState = when(event) {
     is Assigned -> InProgress(event.entityKey, event.newUserId)
     is Blocked -> OnHold(event.entityKey)
+    is Updated -> InProgress(event.entityKey, assignee)
     else -> InvalidState(event.entityKey, this, event)
   }
 }
@@ -120,9 +122,9 @@ data class CommandStartWork(val id: String, val assignee: UserId) : TicketComman
 data class CommandEndWork(val id: String) : TicketCommand()
 
 data class CommandAssignToUser(val id: String, val assignee: UserId) : TicketCommand()
-//
-//data class CommandUpdateMetadata(val id: String, val title: String?, val description: String?) : TicketCommand()
-//
+
+data class CommandUpdateMetadata(val id: String, val description: String) : TicketCommand()
+
 data class CommandPutOnHold(val id: String) : TicketCommand()
 //
 //data class CommandReactivate(val id: String) : TicketCommand()

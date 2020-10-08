@@ -17,6 +17,15 @@ object JAssignTicketRequest : JAny<AssignTicketRequest>() {
         )
 }
 
+object JUpdateTicketRequest : JAny<UpdateTicketRequest>() {
+    private val description by str(UpdateTicketRequest::description)
+
+    override fun JsonNodeObject.deserializeOrThrow(): UpdateTicketRequest =
+        UpdateTicketRequest(
+            description = +description
+        )
+}
+
 object JAddTicketRequest : JAny<AddTicketRequest>() {
     private val description by str(AddTicketRequest::description)
 
@@ -186,10 +195,12 @@ object JCompleted : JAny<Completed>() {
 
 object JUpdated : JAny<Updated>() {
     private val entityKey by str(Updated::entityKey)
+    private val newDescription by str(Updated::newDescription)
 
     override fun JsonNodeObject.deserializeOrThrow(): Updated =
         Updated(
-            entityKey = +entityKey
+            entityKey = +entityKey,
+            newDescription = +newDescription
         )
 }
 

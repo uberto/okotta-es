@@ -28,6 +28,7 @@ class HelpDesk(val ticketsProjection: TicketsProjection, val commandHandler: Tic
         "/tickets/count" bind Method.GET to ::countTickets,
         "/ticket/{ticketId}" bind Method.GET to ::getTicket,
         "/ticket/{ticketId}/assign" bind Method.POST to ::assignTicket,
+        "/ticket/{ticketId}/update" bind Method.POST to ::updateTicket,
         "/ticket/{ticketId}/start" bind Method.POST to ::startTicket,
         "/ticket/{ticketId}/onhold" bind Method.POST to ::putTicketOnHold,
         "/ticket/{ticketId}/complete" bind Method.POST to ::completeTicket,
@@ -74,6 +75,15 @@ class HelpDesk(val ticketsProjection: TicketsProjection, val commandHandler: Tic
             request.deserialise(JAssignTicketRequest) ?: return Response(Status.BAD_REQUEST)
 
         commandHandler(CommandAssignToUser(ticketId, assign.assignee.asUserId()))
+        return Response(NO_CONTENT)
+    }
+
+    private fun updateTicket(request: Request): Response {
+        val ticketId = request.path("ticketId") ?: return Response(Status.BAD_REQUEST)
+        val update: UpdateTicketRequest =
+            request.deserialise(JUpdateTicketRequest) ?: return Response(Status.BAD_REQUEST)
+
+        commandHandler(CommandUpdateMetadata(ticketId, update.description))
         return Response(NO_CONTENT)
     }
 
@@ -137,6 +147,7 @@ private fun Response.contentTypeJson() = header("Content-type", "application/jso
 
 // these types define the property names of the serialised json request/response objects
 data class AssignTicketRequest(val assignee: String)
+data class UpdateTicketRequest(val description: String)
 data class AddTicketRequest(val title: String, val description: String)
 data class AddTicketResponse(val id: String)
 data class StartTicketRequest(val assignee: String)
