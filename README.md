@@ -1,6 +1,6 @@
 # How to Build and Run
 
-* Install java jdk 8+
+* Make sure you have a java jdk installed, version 8 or later
 * Get the code e.g. `git clone git@github.com:uberto/okotta-es.git`
 * Build using gradle wrapper (this will auto-download gradle and all dependencies) e.g. 
 ```
