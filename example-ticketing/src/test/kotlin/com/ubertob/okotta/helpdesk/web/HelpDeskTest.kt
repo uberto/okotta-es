@@ -1,28 +1,11 @@
 package com.ubertob.okotta.helpdesk.web
 
-import com.beust.klaxon.JsonArray
-import com.beust.klaxon.JsonObject
-import com.ubertob.okotta.helpdesk.domain.CommandAddToBacklog
-import com.ubertob.okotta.helpdesk.domain.CommandStartWork
-import com.ubertob.okotta.helpdesk.domain.UserId
-import org.http4k.core.Method
-import org.http4k.core.Method.GET
-import org.http4k.core.Method.POST
-import org.http4k.core.Request
-import org.http4k.core.Status.Companion.NOT_FOUND
-import org.http4k.core.Status.Companion.NO_CONTENT
-import org.http4k.core.Status.Companion.OK
-import org.junit.jupiter.api.Test
-import strikt.api.Assertion
-import strikt.api.expectThat
-import strikt.assertions.isEqualTo
-import strikt.assertions.isNotNull
-
 
 internal class HelpDeskTest {
 
     private val handler = helpDeskBuilder()
 
+    /*
     @Test
     fun `create a new ticket`() {
         with(
@@ -177,3 +160,7 @@ private fun Assertion.Builder<JsonObject>.isEquivalentTo(jsonString: String): As
 
 private fun Assertion.Builder<JsonArray<*>>.isEquivalentToA(jsonString: String): Assertion.Builder<JsonArray<*>> =
     this.isEqualTo(jsonString.asJsonArray())
+
+
+     */
+}
