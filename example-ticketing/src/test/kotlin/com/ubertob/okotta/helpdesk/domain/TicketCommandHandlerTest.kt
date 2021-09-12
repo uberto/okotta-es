@@ -112,7 +112,7 @@ internal class TicketCommandHandlerTest {
 
 
     @Test
-    fun `trying to assing a ticket to the same person doesn't generate events`() {
+    fun `trying to assign a ticket to the same person doesn't generate events`() {
         val frank = UserId("Frank")
 
         val id = ch(CommandAddToBacklog("my title", "doing some stuff")).single().entityKey
