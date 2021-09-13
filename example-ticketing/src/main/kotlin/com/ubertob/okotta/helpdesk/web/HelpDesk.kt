@@ -1,13 +1,13 @@
 package com.ubertob.okotta.helpdesk.web
 
+import com.ubertob.kondor.json.JsonConverter
 import com.ubertob.kondor.outcome.Outcome
 import com.ubertob.kondor.outcome.OutcomeError
 import com.ubertob.kondor.outcome.onFailure
 import com.ubertob.okotta.helpdesk.domain.*
-import com.ubertob.okotta.helpdesk.json.JAssignTicketRequest
+import com.ubertob.okotta.helpdesk.json.*
 import com.ubertob.okotta.helpdesk.lib.EventSeq
 import org.http4k.core.*
-import org.http4k.core.Status.Companion.INTERNAL_SERVER_ERROR
 import org.http4k.core.Status.Companion.NO_CONTENT
 import org.http4k.core.Status.Companion.OK
 import org.http4k.routing.ResourceLoader.Companion.Classpath
@@ -41,20 +41,21 @@ class HelpDesk(val ticketsProjection: TicketsProjection, val commandHandler: Tic
                     eventName = storedEvent.event.javaClass.simpleName
                 )
             }
-        return Response(OK) //.contentTypeJson().body(DebugEventsResponse(storedEvents).serialise())
+        return Response(OK).serialize(JDebugEventsResponse, storedEvents)
     }
 
     private fun addTicket(request: Request): Response {
-        val add: AddTicketRequest = request.deserialise() ?: return Response(Status.BAD_REQUEST)
+        val add: AddTicketRequest = request.deserialise(JAddTicketRequest) ?: return Response(Status.BAD_REQUEST)
         return commandHandler(CommandAddToBacklog(add.title, add.description))
             .first().entityKey
-            .let { Response(OK).serialize(AddTicketResponse(it)) }
+            .let { Response(OK).serialize(JAddTicketResponse, AddTicketResponse(it)) }
     }
 
     private fun getTicket(request: Request): Response {
         val ticketId = request.path("ticketId") ?: return Response(Status.BAD_REQUEST)
         val found = ticketsProjection.getTicket(ticketId) ?: return Response(Status.NOT_FOUND)
         return Response(OK).serialize(
+            JGetTicketResponse,
             GetTicketResponse(
                 id = ticketId,
                 title = found.title,
@@ -67,7 +68,8 @@ class HelpDesk(val ticketsProjection: TicketsProjection, val commandHandler: Tic
 
     private fun assignTicket(request: Request): Response {
         val ticketId = request.path("ticketId") ?: return Response(Status.BAD_REQUEST)
-        val assign: AssignTicketRequest = request.deserialise() ?: return Response(Status.BAD_REQUEST)
+        val assign: AssignTicketRequest =
+            request.deserialise(JAssignTicketRequest) ?: return Response(Status.BAD_REQUEST)
 
         commandHandler(CommandAssignToUser(ticketId, assign.assignee.asUserId()))
         return Response(NO_CONTENT)
@@ -83,12 +85,13 @@ class HelpDesk(val ticketsProjection: TicketsProjection, val commandHandler: Tic
                 assignee = it.value.assignee?.name
             )
         }
-        return Response(OK).serialize(all)
+        return Response(OK).serialize(JAllTicketsResponse, all)
     }
 
     private fun startTicket(request: Request): Response {
         val ticketId = request.path("ticketId") ?: return Response(Status.BAD_REQUEST)
-        val startTicket: StartTicketRequest = request.deserialise() ?: return Response(Status.BAD_REQUEST)
+        val startTicket: StartTicketRequest =
+            request.deserialise(JStartTicketRequest) ?: return Response(Status.BAD_REQUEST)
         commandHandler(CommandStartWork(ticketId, startTicket.assignee.asUserId()))
         return Response(NO_CONTENT)
     }
@@ -104,16 +107,11 @@ class HelpDesk(val ticketsProjection: TicketsProjection, val commandHandler: Tic
 
 }
 
-private inline fun <reified T> Response.serialize(value: T): Response = when (T::class) {
-    AssignTicketRequest::class -> JAssignTicketRequest.toJson(value as AssignTicketRequest)
-    else -> null
-}?.let { json -> contentTypeJson().body(json) }
-    ?: Response(INTERNAL_SERVER_ERROR).body("Converted not found for $value")
+fun <T> Response.serialize(conv: JsonConverter<T, *>, value: T): Response =
+    contentTypeJson().body(conv.toJson(value))
 
-inline fun <reified T> Request.deserialise(): T? = when (T::class) {
-    AssignTicketRequest::class -> JAssignTicketRequest.fromJson(bodyString()).orNull() as T?
-    else -> null
-}
+fun <T> Request.deserialise(conv: JsonConverter<T, *>): T? =
+    conv.fromJson(bodyString()).orNull()
 
 fun <E : OutcomeError, T> Outcome<E, T>.orNull(): T? =
     onFailure { return null }
