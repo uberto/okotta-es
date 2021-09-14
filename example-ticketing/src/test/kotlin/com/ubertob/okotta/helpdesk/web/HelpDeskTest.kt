@@ -1,11 +1,29 @@
 package com.ubertob.okotta.helpdesk.web
 
+import com.ubertob.kondor.json.jsonnode.JsonNode
+import com.ubertob.kondor.json.jsonnode.parseJsonNode
+import com.ubertob.okotta.helpdesk.domain.CommandAddToBacklog
+import com.ubertob.okotta.helpdesk.domain.CommandStartWork
+import com.ubertob.okotta.helpdesk.domain.UserId
+import com.ubertob.okotta.helpdesk.json.JAddTicketResponse
+import org.http4k.core.Method.GET
+import org.http4k.core.Method.POST
+import org.http4k.core.Request
+import org.http4k.core.Status.Companion.NOT_FOUND
+import org.http4k.core.Status.Companion.NO_CONTENT
+import org.http4k.core.Status.Companion.OK
+import org.junit.jupiter.api.Test
+import strikt.api.Assertion
+import strikt.api.expectThat
+import strikt.assertions.isEqualTo
+import strikt.assertions.isNotBlank
+import strikt.assertions.isNotNull
+
 
 internal class HelpDeskTest {
 
     private val handler = helpDeskBuilder()
 
-    /*
     @Test
     fun `create a new ticket`() {
         with(
@@ -19,8 +37,10 @@ internal class HelpDeskTest {
             )
         ) {
             expectThat(status).isEqualTo(OK)
-            val jsonContent = bodyString().asJsonObject()
-            expectThat(jsonContent["id"]).isNotNull()
+            val result = JAddTicketResponse.fromJson(bodyString()).orNull()
+            expectThat(result)
+                .isNotNull()
+                .get { id }.isNotBlank()
         }
     }
 
@@ -31,7 +51,7 @@ internal class HelpDeskTest {
 
         with(handler(Request(GET, "/ticket/$id"))) {
             expectThat(status).isEqualTo(OK)
-            expectThat(bodyString().asJsonObject()).isEquivalentTo(
+            expectThat(parseJsonNode(bodyString()).orThrow()).isEquivalentTo(
                 """{
                     "id": "$id",
                     "title": "title1",
@@ -43,7 +63,7 @@ internal class HelpDeskTest {
 
         with(handler(Request(GET, "/tickets"))) {
             expectThat(status).isEqualTo(OK)
-            expectThat(bodyString().asJsonArray()).isEquivalentToA(
+            expectThat(parseJsonNode(bodyString()).orThrow()).isEquivalentTo(
                 """[{
                     "id": "$id",
                     "title": "title1",
@@ -80,7 +100,7 @@ internal class HelpDeskTest {
 
         with(handler(Request(GET, "/ticket/$id"))) {
             expectThat(status).isEqualTo(OK)
-            expectThat(bodyString().asJsonObject()).isEquivalentTo(
+            expectThat(parseJsonNode(bodyString()).orThrow()).isEquivalentTo(
                 """{
                     "id": "$id",
                     "title" : "title1",
@@ -112,7 +132,7 @@ internal class HelpDeskTest {
 
         with(handler(Request(GET, "/ticket/$id"))) {
             expectThat(status).isEqualTo(OK)
-            expectThat(bodyString().asJsonObject()).isEquivalentTo(
+            expectThat(parseJsonNode(bodyString()).orThrow()).isEquivalentTo(
                 """{
                     "id": "$id",
                     "title" : "title1",
@@ -133,7 +153,7 @@ internal class HelpDeskTest {
 
         with(
             handler(
-                Request(Method.POST, "/ticket/$id/complete")
+                Request(POST, "/ticket/$id/complete")
             )
         ) {
             expectThat(status).isEqualTo(NO_CONTENT)
@@ -142,7 +162,7 @@ internal class HelpDeskTest {
 
         with(handler(Request(GET, "/ticket/$id"))) {
             expectThat(status).isEqualTo(OK)
-            expectThat(bodyString().asJsonObject()).isEquivalentTo(
+            expectThat(parseJsonNode(bodyString()).orThrow()).isEquivalentTo(
                 """{
                     "id": "$id",
                     "title" : "title1",
@@ -155,12 +175,5 @@ internal class HelpDeskTest {
     }
 }
 
-private fun Assertion.Builder<JsonObject>.isEquivalentTo(jsonString: String): Assertion.Builder<JsonObject> =
-    this.isEqualTo(jsonString.asJsonObject())
-
-private fun Assertion.Builder<JsonArray<*>>.isEquivalentToA(jsonString: String): Assertion.Builder<JsonArray<*>> =
-    this.isEqualTo(jsonString.asJsonArray())
-
-
-     */
-}
+private fun Assertion.Builder<JsonNode>.isEquivalentTo(jsonString: String): Assertion.Builder<JsonNode> =
+    this.isEqualTo(parseJsonNode(jsonString).orThrow())
