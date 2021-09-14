@@ -101,8 +101,8 @@ object JTicketEvent : JSealed<TicketEvent>() {
         "Updated" to JUpdated
     )
 
-    override fun extractTypeName(event: TicketEvent): String =
-        when (event) {
+    override fun extractTypeName(obj: TicketEvent): String =
+        when (obj) {
             is Assigned -> "Assigned"
             is Blocked -> "Blocked"
             is Completed -> "Completed"
