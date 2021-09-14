@@ -87,6 +87,8 @@ object JDebugEvent : JAny<DebugEvent>() {
         )
 }
 
+// in case of persistence
+
 object JTicketEvent : JSealed<TicketEvent>() {
     override val discriminatorFieldName = "type"
 

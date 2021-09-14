@@ -3,6 +3,8 @@ package com.ubertob.okotta.helpdesk
 import com.ubertob.kondortools.generateConverterFileFor
 import com.ubertob.okotta.helpdesk.domain.*
 import org.junit.jupiter.api.Test
+import strikt.api.expectThat
+import strikt.assertions.isNotBlank
 
 class JsonTest {
 
@@ -17,6 +19,8 @@ class JsonTest {
             Completed::class,
             Updated::class,
         )
+
+        expectThat(fileText).isNotBlank()
 
         println(fileText)
     }
